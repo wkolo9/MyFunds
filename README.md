@@ -1,13 +1,57 @@
-# 10x Astro Starter
+# MyFunds Portfolio Tracker
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+![Project Status: MVP-1 Planning](https://img.shields.io/badge/status-MVP--1%20Planning-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
-## Tech Stack
+A web application for tracking your diversified financial portfolio, providing a consolidated view of your assets, sector allocation, and market performance in one place.
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+## 📖 Table of Contents
+
+- [Project Description](#-project-description)
+- [✨ Key Features (MVP)](#-key-features-mvp)
+- [🛠️ Tech Stack](#-tech-stack)
+- [🚀 Getting Started Locally](#-getting-started-locally)
+- [📜 Available Scripts](#-available-scripts)
+- [🗺️ Project Scope (MVP-1)](#-project-scope-mvp-1)
+- [⚖️ License](#-license)
+
+##  descriptions Project Description
+
+MyFunds solves the problem of tracking a diversified investment portfolio spread across multiple asset classes (stocks, crypto, etc.) and currencies. It allows users to manually input their holdings and provides a single, unified dashboard to:
+
+* View the total portfolio value in a single currency (USD or PLN).
+* Analyze the portfolio's allocation across different sectors.
+* Monitor a custom watchlist of assets on a single page.
+
+This project is the **MVP-1** build, focusing on core aggregation and visualization features.
+
+## ✨ Key Features (MVP)
+
+* **Portfolio CRUD:** Manually add, edit, and delete your asset holdings (e.g., "10 AAPL", "1.5 BTC").
+* **Currency Conversion:** View your total portfolio value in either **USD** (default) or **PLN**, with automatic conversion based on cached exchange rates.
+* **Sector Management:** Create custom sectors (e.g., "Technology," "Crypto") and assign your assets to them to see your allocation.
+* **Watchlist Grid:** A dedicated page with a 4x4 grid (up to 16 assets) displaying price charts for assets you want to follow.
+* **Drag & Drop:** Reorganize your watchlist grid using drag-and-drop functionality.
+* **User Authentication:** Secure user accounts (registration, login) provided by Supabase.
+
+## 🛠️ Tech Stack
+
+This project uses a modern, performant, and scalable tech stack.
+
+| Category | Technology | Version | Description |
+| :--- | :--- | :--- | :--- |
+| **Frontend Framework** | [Astro](https://astro.build/) | `v5.x` | Core framework for building the fast, content-focused site. |
+| **UI Library** | [React](https://react.dev/) | `v19.x` | Used for interactive "UI islands" (e.g., the portfolio dashboard, chart grid). |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) | `v5.x` | For strong typing and developer productivity. |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) | `v4.x` | A utility-first CSS framework for rapid styling. |
+| **UI Components** | [Shadcn/ui](https://ui.shadcn.com/) | - | A library of accessible, unstyled components. |
+| **Backend (BaaS)** | [Supabase](https://supabase.com/) | - | Provides PostgreSQL database, authentication, and instant APIs. |
+| **CI/CD** | [GitHub Actions](https://github.com/features/actions) | - | For automating build, test, and deployment pipelines. |
+| **Hosting** | [DigitalOcean](https://www.digitalocean.com/) | - | Target platform for hosting the production Docker image. |
+
+## 🚀 Getting Started Locally
+
+To run a local instance of MyFunds, you will need Node.js (v18+), npm, and the [Supabase CLI](https://supabase.com/docs/guides/cli) installed.
 
 ## Prerequisites
 
