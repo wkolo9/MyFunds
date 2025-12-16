@@ -27,6 +27,7 @@ export enum ErrorCode {
 
   // Database errors
   DATABASE_ERROR = 'DATABASE_ERROR',
+  CONFLICT = 'CONFLICT',
 
   // Generic errors
   INTERNAL_ERROR = 'INTERNAL_ERROR',
@@ -40,6 +41,13 @@ export class ValidationError extends Error {
   constructor(message: string, public field?: string) {
     super(`Validation error: ${message}`);
     this.name = 'ValidationError';
+  }
+}
+
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConflictError';
   }
 }
 
@@ -110,6 +118,14 @@ export function handleServiceError(error: unknown): Response {
       error.message.replace('Validation error: ', ''),
       400,
       error.field
+    );
+  }
+
+  if (error instanceof ConflictError) {
+    return createErrorResponseObject(
+      ErrorCode.CONFLICT,
+      error.message,
+      409
     );
   }
 

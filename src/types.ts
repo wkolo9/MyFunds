@@ -222,24 +222,25 @@ export interface UpdateWatchlistItemPositionCommand {
 }
 
 /**
- * Watchlist Position Update - single item in batch position update
+ * Watchlist Item Update - single item in batch update
  */
-export interface WatchlistPositionUpdate {
+export interface WatchlistItemUpdate {
   id: string; // UUID of the watchlist item
-  grid_position: number; // New position (0-15)
+  grid_position?: number; // New position (0-15)
+  ticker?: string; // New ticker
 }
 
 /**
- * Batch Update Watchlist Positions Command - request body for PATCH /api/watchlist/positions
+ * Batch Update Watchlist Items Command - request body for PATCH /api/watchlist
  */
-export interface BatchUpdateWatchlistPositionsCommand {
-  updates: WatchlistPositionUpdate[];
+export interface BatchUpdateWatchlistItemsCommand {
+  updates: WatchlistItemUpdate[];
 }
 
 /**
- * Batch Update Watchlist Positions Response - returned by PATCH /api/watchlist/positions
+ * Batch Update Watchlist Items Response - returned by PATCH /api/watchlist
  */
-export interface BatchUpdateWatchlistPositionsDTO {
+export interface BatchUpdateWatchlistItemsDTO {
   items: WatchlistItemDTO[];
 }
 
