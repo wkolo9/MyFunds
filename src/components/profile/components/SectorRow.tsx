@@ -3,7 +3,7 @@ import { Pencil, Trash2, Check, X } from "lucide-react"
 import { Button } from "../../ui/button"
 import { Input } from "../../ui/input"
 import { TableCell, TableRow } from "../../ui/table"
-import type { SectorDTO } from "../../../types"
+import type { SectorDTO } from "@/types"
 
 interface SectorRowProps {
   sector: SectorDTO;

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../ui/card";
 import { Label } from "../../ui/label";
 import { CurrencySelector } from "./CurrencySelector";
-import type { ProfileDTO, Currency } from "../../../types";
+import type { ProfileDTO, Currency } from "@/types";
 import { useState } from "react";
 
 interface UserSettingsCardProps {

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../../db/database.types';
+import type { Database } from '@/db/database.types';
 import { ProfileService } from '../profile.service';
-import type { ProfileEntity } from '../../../types';
+import type { ProfileEntity } from '@/types';
 
 // Mock Supabase client
 const mockSupabaseClient = {

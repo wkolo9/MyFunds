@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "../../ui/table"
 import { SectorRow } from "./SectorRow"
-import type { SectorDTO } from "../../../types"
+import type { SectorDTO } from "@/types"
 
 interface SectorListProps {
   sectors: SectorDTO[];

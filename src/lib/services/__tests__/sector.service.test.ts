@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SectorService } from '../sector.service';
-import type { Database } from '../../../db/database.types';
+import type { Database } from '@/db/database.types';
 
 // Mock Supabase client
 const mockSupabase = {

@@ -1,10 +1,10 @@
 import type { APIRoute } from 'astro';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../../db/database.types';
-import { createSectorService } from '../../../lib/services/sector.service';
-import { createErrorResponseObject, ErrorCode, handleServiceError } from '../../../lib/utils/error.utils';
-import { updateSectorSchema } from '../../../lib/validation/sector.validation';
-import { getAuthenticatedUser } from '../../../lib/utils/auth.utils';
+import type { Database } from '@/db/database.types';
+import { createSectorService } from '@/lib/services/sector.service';
+import { createErrorResponseObject, ErrorCode, handleServiceError } from '@/lib/utils/error.utils';
+import { updateSectorSchema } from '@/lib/validation/sector.validation';
+import { getAuthenticatedUser } from '@/lib/utils/auth.utils';
 
 export const prerender = false;
 

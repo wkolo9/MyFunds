@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select"
-import type { Currency } from "../../../types"
+import type { Currency } from "@/types"
 
 interface CurrencySelectorProps {
   value: Currency;

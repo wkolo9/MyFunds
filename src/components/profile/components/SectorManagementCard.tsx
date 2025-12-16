@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../..
 import { SectorAddForm } from "./SectorAddForm"
 import { SectorList } from "./SectorList"
 import { DeleteSectorDialog } from "./DeleteSectorDialog"
-import type { SectorDTO } from "../../../types"
+import type { SectorDTO } from "@/types"
 import { toast } from "sonner"
 
 interface SectorManagementCardProps {

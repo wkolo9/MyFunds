@@ -1,21 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIRoute } from 'astro';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../../db/database.types';
+import type { Database } from '@/db/database.types';
 import { GET, PATCH } from '../profile';
-import type { ProfileEntity } from '../../../types';
+import type { ProfileEntity } from '@/types';
 
 // Mock dependencies
-vi.mock('../../../lib/services/profile.service', () => ({
+vi.mock('@/lib/services/profile.service', () => ({
   createProfileService: vi.fn(),
 }));
 
-vi.mock('../../../db/supabase.client', () => ({
+vi.mock('@/db/supabase.client', () => ({
   DEFAULT_USER_ID: '550e8400-e29b-41d4-a716-446655440000',
 }));
 
-import { createProfileService } from '../../../lib/services/profile.service';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
+import { createProfileService } from '@/lib/services/profile.service';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
 
 import type { Mock } from 'vitest';
 
@@ -136,7 +136,7 @@ describe('/api/profile', () => {
 
     it('should return 400 for validation errors with field information', async () => {
       // Test the error handling for validation errors with field info
-      const { ValidationError, handleServiceError } = await import('../../../lib/utils/error.utils');
+      const { ValidationError, handleServiceError } = await import('@/lib/utils/error.utils');
       const validationError = new ValidationError('Invalid currency value', 'preferred_currency');
 
       const response = handleServiceError(validationError);
