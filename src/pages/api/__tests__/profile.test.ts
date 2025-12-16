@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIRoute } from 'astro';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../../db/database.types';
-import { GET } from '../profile';
+import { GET, PATCH } from '../profile';
 import type { ProfileEntity } from '../../../types';
 
 // Mock dependencies
@@ -17,24 +17,44 @@ vi.mock('../../../db/supabase.client', () => ({
 import { createProfileService } from '../../../lib/services/profile.service';
 import { DEFAULT_USER_ID } from '../../../db/supabase.client';
 
+import type { Mock } from 'vitest';
+
+// Helper type for mocked Supabase client
+type MockSupabaseClient = {
+  auth: {
+    getUser: Mock;
+  };
+} & Partial<SupabaseClient<Database>>;
+
 describe('/api/profile', () => {
-  let mockSupabaseClient: SupabaseClient<Database>;
+  let mockSupabaseClient: MockSupabaseClient;
   let mockProfileService: any;
   let mockContext: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockSupabaseClient = {} as SupabaseClient<Database>;
+    mockSupabaseClient = {
+      auth: {
+        getUser: vi.fn(),
+      },
+    } as unknown as MockSupabaseClient;
+
     mockProfileService = {
       getProfile: vi.fn(),
+      updateProfile: vi.fn(),
     };
+
 
     (createProfileService as any).mockReturnValue(mockProfileService);
 
     mockContext = {
       locals: {
         supabase: mockSupabaseClient,
+      },
+      request: {
+        headers: new Headers(),
+        json: vi.fn(),
       },
     };
   });
@@ -126,6 +146,78 @@ describe('/api/profile', () => {
       expect(result.error.code).toBe('VALIDATION_ERROR');
       expect(result.error.message).toBe('Invalid currency value');
       expect(result.error.field).toBe('preferred_currency');
+    });
+  });
+
+  describe('PATCH /api/profile', () => {
+    const mockUser = { id: 'user-123' };
+    const validToken = 'valid-token';
+    const validBody = { preferred_currency: 'PLN' };
+
+    beforeEach(() => {
+        mockContext.request.headers.set('Authorization', `Bearer ${validToken}`);
+        mockSupabaseClient.auth.getUser.mockResolvedValue({ data: { user: mockUser }, error: null });
+        mockContext.request.json.mockResolvedValue(validBody);
+    });
+
+    it('should update profile successfully', async () => {
+        const updatedProfile = {
+            user_id: mockUser.id,
+            preferred_currency: 'PLN',
+            created_at: '2025-01-01',
+            updated_at: '2025-01-02'
+        };
+        mockProfileService.updateProfile.mockResolvedValue(updatedProfile);
+
+        const response = await PATCH(mockContext);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result).toEqual(updatedProfile);
+        expect(mockSupabaseClient.auth.getUser).toHaveBeenCalledWith(validToken);
+        expect(mockProfileService.updateProfile).toHaveBeenCalledWith(mockUser.id, validBody);
+    });
+
+    it('should return 401 if Authorization header is missing', async () => {
+        mockContext.request.headers.delete('Authorization');
+        
+        const response = await PATCH(mockContext);
+        const result = await response.json();
+
+        expect(response.status).toBe(401);
+        expect(result.error.code).toBe('MISSING_AUTH_HEADER');
+    });
+
+    it('should return 401 if token is invalid', async () => {
+        mockSupabaseClient.auth.getUser.mockResolvedValue({ data: { user: null }, error: { message: 'Invalid token' } });
+
+        const response = await PATCH(mockContext);
+        const result = await response.json();
+
+        expect(response.status).toBe(401);
+        expect(result.error.code).toBe('INVALID_TOKEN');
+    });
+
+    it('should return 400 if body is invalid JSON', async () => {
+        mockContext.request.json.mockRejectedValue(new Error('Invalid JSON'));
+
+        const response = await PATCH(mockContext);
+        const result = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(result.error.code).toBe('VALIDATION_ERROR');
+        expect(result.error.message).toBe('Invalid JSON body');
+    });
+
+    it('should return 400 if validation fails (Zod)', async () => {
+        mockContext.request.json.mockResolvedValue({ preferred_currency: 'INVALID' });
+
+        const response = await PATCH(mockContext);
+        const result = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(result.error.code).toBe('VALIDATION_ERROR');
+        expect(result.error.message).toContain("Invalid enum value");
     });
   });
 });

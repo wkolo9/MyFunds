@@ -34,6 +34,30 @@ export enum ErrorCode {
 }
 
 /**
+ * Custom error classes for different types of errors
+ */
+export class ValidationError extends Error {
+  constructor(message: string, public field?: string) {
+    super(`Validation error: ${message}`);
+    this.name = 'ValidationError';
+  }
+}
+
+export class NotFoundError extends Error {
+  constructor(resource: string) {
+    super(`${resource} not found`);
+    this.name = 'NotFoundError';
+  }
+}
+
+export class DatabaseError extends Error {
+  constructor(message: string) {
+    super(`Database error: ${message}`);
+    this.name = 'DatabaseError';
+  }
+}
+
+/**
  * Creates a standardized error response DTO
  */
 export function createErrorResponse(
@@ -80,6 +104,15 @@ export function createErrorResponseObject(
  * Handles service layer errors and converts them to appropriate HTTP responses
  */
 export function handleServiceError(error: unknown): Response {
+  if (error instanceof ValidationError) {
+    return createErrorResponseObject(
+      ErrorCode.VALIDATION_ERROR,
+      error.message.replace('Validation error: ', ''),
+      400,
+      error.field
+    );
+  }
+
   if (error instanceof Error) {
     // Handle specific service errors
     if (error.message === 'Profile not found') {
@@ -122,6 +155,7 @@ export function handleServiceError(error: unknown): Response {
       );
     }
 
+    // Fallback for string-based validation errors (legacy or from other sources)
     if (error.message.startsWith('Validation error:')) {
       return createErrorResponseObject(
         ErrorCode.VALIDATION_ERROR,
@@ -138,28 +172,4 @@ export function handleServiceError(error: unknown): Response {
     'Internal server error',
     500
   );
-}
-
-/**
- * Custom error classes for different types of errors
- */
-export class ValidationError extends Error {
-  constructor(message: string, public field?: string) {
-    super(`Validation error: ${message}`);
-    this.name = 'ValidationError';
-  }
-}
-
-export class NotFoundError extends Error {
-  constructor(resource: string) {
-    super(`${resource} not found`);
-    this.name = 'NotFoundError';
-  }
-}
-
-export class DatabaseError extends Error {
-  constructor(message: string) {
-    super(`Database error: ${message}`);
-    this.name = 'DatabaseError';
-  }
 }

@@ -3,6 +3,8 @@ import type { Database } from '../../db/database.types';
 import type { ProfileEntity } from '../../types';
 import { ValidationError } from '../../lib/utils/error.utils';
 
+import type { UpdateProfileCommand } from '../../types';
+
 /**
  * Profile Service - handles profile-related database operations
  */
@@ -37,6 +39,32 @@ export class ProfileService {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as ProfileEntity;
+    }
+
+    return data as ProfileEntity;
+  }
+
+  /**
+   * Updates a user's profile settings
+   * Only allows updating fields defined in UpdateProfileCommand
+   */
+  async updateProfile(userId: string, command: UpdateProfileCommand): Promise<ProfileEntity> {
+    if (!userId) {
+      throw new ValidationError('User ID is required', 'user_id');
+    }
+
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .update({
+        preferred_currency: command.preferred_currency,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
     }
 
     return data as ProfileEntity;
