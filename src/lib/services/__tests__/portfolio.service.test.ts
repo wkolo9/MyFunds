@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PortfolioService } from '../../../lib/services/portfolio.service';
-import { NotFoundError, ConflictError } from '../../../lib/utils/error.utils';
+import { NotFoundError, ConflictError, ValidationError } from '../../../lib/utils/error.utils';
 import { marketService } from '../../../lib/services/market.service';
 
 // Mock dependencies
