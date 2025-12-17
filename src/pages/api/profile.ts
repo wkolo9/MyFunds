@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
 
 import { createProfileService } from '../../lib/services/profile.service';
-import { DEFAULT_USER_ID } from '../../db/supabase.client';
+import { DEFAULT_USER_ID } from '../../config/constants';
 import { createErrorResponseObject, handleServiceError, ErrorCode } from '../../lib/utils/error.utils';
 import type { ProfileDTO } from '../../types';
 import { updateProfileCommandSchema } from '../../lib/validation/profile.validation';

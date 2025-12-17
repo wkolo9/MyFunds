@@ -1,0 +1,11 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { WatchlistView } from '@/components/watchlist/components/WatchlistView';
+---
+
+<Layout title="Watchlist | MyFunds">
+  <main class="w-full">
+    <WatchlistView client:only="react" />
+  </main>
+</Layout>
+

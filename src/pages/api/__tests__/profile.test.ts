@@ -15,7 +15,7 @@ vi.mock('@/db/supabase.client', () => ({
 }));
 
 import { createProfileService } from '@/lib/services/profile.service';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { DEFAULT_USER_ID } from '@/config/constants';
 
 import type { Mock } from 'vitest';
 

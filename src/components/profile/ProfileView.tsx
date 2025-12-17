@@ -44,7 +44,7 @@ export function ProfileView() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto py-10 px-4">
+    <div className="p-4 md:p-8">
       <Toaster />
       <ProfileHeader />
       

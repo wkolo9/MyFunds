@@ -1,8 +1,10 @@
 ---
-import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+import { PortfolioDashboard } from "../components/portfolio/PortfolioDashboard";
 ---
 
 <Layout>
-  <Welcome />
+  <main class="w-full">
+    <PortfolioDashboard client:load />
+  </main>
 </Layout>

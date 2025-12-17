@@ -1,4 +1,4 @@
- /**
+/**
  * MyFunds MVP - Type Definitions
  * 
  * This file contains:
@@ -249,6 +249,18 @@ export interface BatchUpdateWatchlistItemsDTO {
 // ============================================================================
 
 /**
+ * Candle Data - represents a single OHLC candle
+ * Used for charting
+ */
+export interface CandleData {
+  time: string; // 'yyyy-mm-dd'
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+/**
  * Asset Price DTO - returned by GET /api/market/price/:ticker
  */
 export interface AssetPriceDTO {
@@ -313,4 +325,3 @@ export interface CurrencyQueryParams {
 export interface PortfolioFilterParams extends CurrencyQueryParams {
   sector_id?: string | 'null'; // 'null' string to filter for unassigned assets
 }
-
