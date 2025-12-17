@@ -1,0 +1,33 @@
+---
+import { cn } from "@/lib/utils";
+
+const { pathname } = Astro.url;
+
+// Determine active tab
+const isPortfolio = pathname === "/" || pathname.startsWith("/portfolio");
+const isWatchlist = pathname.startsWith("/watchlist");
+
+const linkBase = "flex items-center justify-center py-3 px-4 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+const activeClasses = "bg-primary text-primary-foreground border-primary shadow-sm";
+const inactiveClasses = "bg-card text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground";
+---
+
+<nav class="w-full max-w-7xl mx-auto px-4 pt-6 pb-2" aria-label="Main Navigation">
+  <div class="grid grid-cols-2 gap-4">
+    <a
+      href="/portfolio"
+      class={cn(linkBase, isPortfolio ? activeClasses : inactiveClasses)}
+      aria-current={isPortfolio ? "page" : undefined}
+    >
+      Portfolio
+    </a>
+    <a
+      href="/watchlist"
+      class={cn(linkBase, isWatchlist ? activeClasses : inactiveClasses)}
+      aria-current={isWatchlist ? "page" : undefined}
+    >
+      Watchlist
+    </a>
+  </div>
+</nav>
+

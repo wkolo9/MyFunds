@@ -1,0 +1,17 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { PortfolioDashboard } from '../../components/portfolio/PortfolioDashboard';
+---
+
+<Layout>
+  <div className="container mx-auto py-6 space-y-8">
+    <div className="flex flex-col space-y-2">
+      <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
+      <p className="text-muted-foreground">
+        Manage your assets and view your portfolio performance.
+      </p>
+    </div>
+    <PortfolioDashboard client:load />
+  </div>
+</Layout>
+
