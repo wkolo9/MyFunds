@@ -16,7 +16,7 @@ export const GET: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid Authorization header', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
     }
     const userId = user.id;
 
@@ -48,6 +48,7 @@ export const GET: APIRoute = async (context) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
+    console.error('API Error in GET /api/portfolio:', error);
     return handleServiceError(error);
   }
 };
@@ -60,7 +61,7 @@ export const POST: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid Authorization header', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
     }
     const userId = user.id;
 
@@ -91,6 +92,7 @@ export const POST: APIRoute = async (context) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
+     console.error('API Error in POST /api/portfolio:', error);
     return handleServiceError(error);
   }
 };

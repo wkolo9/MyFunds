@@ -3,10 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
 
 import { createProfileService } from '../../lib/services/profile.service';
-import { DEFAULT_USER_ID } from '../../config/constants';
 import { createErrorResponseObject, handleServiceError, ErrorCode } from '../../lib/utils/error.utils';
 import type { ProfileDTO } from '../../types';
 import { updateProfileCommandSchema } from '../../lib/validation/profile.validation';
+import { getAuthenticatedUser } from '../../lib/utils/auth.utils';
 
 // Disable prerendering for this API route
 export const prerender = false;
@@ -17,19 +17,32 @@ export const prerender = false;
  */
 export const GET: APIRoute = async (context) => {
   try {
+    const user = await getAuthenticatedUser(context);
+    if (!user) {
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+    }
+    const userId = user.id;
+
     // Extract Supabase client from context
     const supabase = context.locals.supabase as SupabaseClient<Database>;
-    if (!supabase) {
-      return createErrorResponseObject(ErrorCode.INTERNAL_ERROR, 'Database client not available', 500);
-    }
-
-    // Use default user ID for development
-    // TODO: Implement proper authentication in production
-    const userId = DEFAULT_USER_ID;
-
+    
     // Create profile service and fetch profile
     const profileService = createProfileService(supabase);
-    const profile = await profileService.getProfile(userId);
+    let profile = await profileService.getProfile(userId);
+
+    // Auto-create profile if missing (similar to sector logic)
+    if (!profile || (profile as any).user_id !== userId) { // Check if mocked data returned or truly missing
+         // Try to ensure profile exists
+         const { data: newProfile, error: profileError } = await supabase
+            .from('profiles')
+            .upsert({ user_id: userId }, { onConflict: 'user_id', ignoreDuplicates: true })
+            .select()
+            .maybeSingle();
+         
+         if (!profileError && newProfile) {
+             profile = newProfile;
+         }
+    }
 
     // Return successful response
     return new Response(JSON.stringify(profile), {
@@ -50,28 +63,11 @@ export const GET: APIRoute = async (context) => {
  */
 export const PATCH: APIRoute = async (context) => {
   try {
-    // 1. Authentication Check
-    const authHeader = context.request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return createErrorResponseObject(
-        ErrorCode.MISSING_AUTH_HEADER,
-        'Missing or invalid Authorization header',
-        401
-      );
+    const user = await getAuthenticatedUser(context);
+    if (!user) {
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
     }
-
-    const token = authHeader.split(' ')[1];
-    const supabase = context.locals.supabase as SupabaseClient<Database>;
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return createErrorResponseObject(
-        ErrorCode.INVALID_TOKEN,
-        'Invalid or expired token',
-        401
-      );
-    }
+    const userId = user.id;
 
     // 2. Parse Request Body
     let body;
@@ -99,18 +95,44 @@ export const PATCH: APIRoute = async (context) => {
     const command = parseResult.data;
 
     // 4. Update Profile
+    const supabase = context.locals.supabase as SupabaseClient<Database>;
     const profileService = createProfileService(supabase);
-    const updatedProfile = await profileService.updateProfile(user.id, command);
-
-    return new Response(JSON.stringify(updatedProfile), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    
+    try {
+        const updatedProfile = await profileService.updateProfile(userId, command);
+        return new Response(JSON.stringify(updatedProfile), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch (err: any) {
+        // Handle PGRST116 (No rows found) - likely missing profile
+        if (err.code === 'PGRST116') {
+             console.error('Profile missing during update, creating one...');
+             // Create profile
+             const { error: createError } = await supabase.from('profiles').insert({ 
+                 user_id: userId,
+                 preferred_currency: command.preferred_currency 
+             });
+             
+             if (createError) {
+                 throw createError;
+             }
+             
+             // Fetch created profile to return
+             const profile = await profileService.getProfile(userId);
+             return new Response(JSON.stringify(profile), {
+                status: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
+        throw err;
+    }
 
   } catch (error) {
     return handleServiceError(error);
   }
 };
-

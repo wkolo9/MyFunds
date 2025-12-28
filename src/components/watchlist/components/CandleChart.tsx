@@ -108,7 +108,7 @@ export const CandleChart: React.FC<CandleChartProps> = ({
       chart.remove();
       chartRef.current = null;
     };
-  }, [ticker, height, colors]); 
+  }, []); 
 
   return (
     <div className="relative w-full" style={{ height }}>

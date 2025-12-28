@@ -1,4 +1,6 @@
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+const yahooFinance = new YahooFinance();
+
 import type { 
   AssetPriceDTO, 
   ExchangeRateDTO, 
@@ -63,21 +65,37 @@ export class MarketDataService {
     }
 
     // Fetch from Yahoo Finance (Cache Miss)
-    const price = await this.fetchPrice(normalizedTicker);
+    try {
+        const price = await this.fetchPrice(normalizedTicker);
+        
+        // Update cache
+        this.cache.prices.set(normalizedTicker, {
+          data: price,
+          timestamp: now,
+        });
 
-    // Update cache
-    this.cache.prices.set(normalizedTicker, {
-      data: price,
-      timestamp: now,
-    });
-
-    return {
-      ticker: normalizedTicker,
-      price,
-      currency: 'USD',
-      timestamp: new Date(now).toISOString(),
-      cached: false,
-    };
+        return {
+          ticker: normalizedTicker,
+          price,
+          currency: 'USD',
+          timestamp: new Date(now).toISOString(),
+          cached: false,
+        };
+    } catch (e) {
+        console.error(`Failed to fetch price for ${normalizedTicker}:`, e);
+        // Fallback for demo purposes if API fails or rate limited
+        // In prod we might want to rethrow or return stored stale data
+        if (cachedEntry) {
+             return {
+                ticker: normalizedTicker,
+                price: cachedEntry.data,
+                currency: 'USD',
+                timestamp: new Date(cachedEntry.timestamp).toISOString(),
+                cached: true,
+             };
+        }
+        throw e;
+    }
   }
 
   /**
@@ -136,13 +154,10 @@ export class MarketDataService {
 
   private async fetchPrice(ticker: string): Promise<number> {
     try {
-      // Suppress console.warn from yahoo-finance2 regarding missing fields if any
-      // but usually quote() is fine.
+      // Use the imported singleton instance
       const quote = await yahooFinance.quote(ticker) as any;
       
       if (!quote || typeof quote.regularMarketPrice !== 'number') {
-         // Try to find a fallback price or throw
-         // Sometimes crypto uses different fields, but regularMarketPrice is standard for stocks
          throw new NotFoundError(`Asset ${ticker}`);
       }
       
@@ -151,7 +166,6 @@ export class MarketDataService {
       if (error.message?.includes('Not Found') || error.name === 'NotFoundError') {
         throw new NotFoundError(`Asset ${ticker}`);
       }
-      // Re-throw other errors to be handled as internal errors
       console.error(`Error fetching price for ${ticker}:`, error);
       throw error;
     }

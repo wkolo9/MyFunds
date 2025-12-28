@@ -4,32 +4,9 @@ import type { Database } from '../../../db/database.types';
 import { createWatchlistService } from '../../../lib/services/watchlist.service';
 import { createErrorResponseObject, handleServiceError, ErrorCode } from '../../../lib/utils/error.utils';
 import { createWatchlistItemSchema, batchUpdateWatchlistItemsSchema } from '../../../lib/validation/watchlist.validation';
+import { getAuthenticatedUser } from '../../../lib/utils/auth.utils';
 
 export const prerender = false;
-
-// Helper to get authenticated user
-async function getAuthenticatedUser(context: any): Promise<{ userId: string | null; errorResponse: Response | null }> {
-  const authHeader = context.request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { 
-      userId: null, 
-      errorResponse: createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid Authorization header', 401) 
-    };
-  }
-  
-  const token = authHeader.split(' ')[1];
-  const supabase = context.locals.supabase as SupabaseClient<Database>;
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    return { 
-      userId: null, 
-      errorResponse: createErrorResponseObject(ErrorCode.INVALID_TOKEN, 'Invalid or expired token', 401) 
-    };
-  }
-
-  return { userId: user.id, errorResponse: null };
-}
 
 /**
  * GET /api/watchlist
@@ -37,8 +14,11 @@ async function getAuthenticatedUser(context: any): Promise<{ userId: string | nu
  */
 export const GET: APIRoute = async (context) => {
   try {
-    const { userId, errorResponse } = await getAuthenticatedUser(context);
-    if (errorResponse) return errorResponse;
+    const user = await getAuthenticatedUser(context);
+    if (!user) {
+       return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+    }
+    const userId = user.id;
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const watchlistService = createWatchlistService(supabase);
@@ -59,8 +39,11 @@ export const GET: APIRoute = async (context) => {
  */
 export const POST: APIRoute = async (context) => {
   try {
-    const { userId, errorResponse } = await getAuthenticatedUser(context);
-    if (errorResponse) return errorResponse;
+    const user = await getAuthenticatedUser(context);
+    if (!user) {
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+    }
+    const userId = user.id;
 
     let body;
     try {
@@ -99,8 +82,11 @@ export const POST: APIRoute = async (context) => {
  */
 export const PATCH: APIRoute = async (context) => {
   try {
-    const { userId, errorResponse } = await getAuthenticatedUser(context);
-    if (errorResponse) return errorResponse;
+    const user = await getAuthenticatedUser(context);
+    if (!user) {
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+    }
+    const userId = user.id;
 
     let body;
     try {
@@ -132,5 +118,3 @@ export const PATCH: APIRoute = async (context) => {
     return handleServiceError(error);
   }
 };
-
-

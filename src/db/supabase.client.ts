@@ -1,17 +1,45 @@
-import { createClient } from '@supabase/supabase-js';
+import type { AstroCookies } from 'astro';
+import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
+import type { Database } from './database.types';
 
-import type { Database } from '../db/database.types.ts';
+export const cookieOptions: CookieOptionsWithName = {
+  path: '/',
+  secure: true,
+  httpOnly: true,
+  sameSite: 'lax',
+};
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_KEY;
+function parseCookieHeader(cookieHeader: string): { name: string; value: string }[] {
+  if (!cookieHeader) return [];
+  return cookieHeader.split(';').map((cookie) => {
+    const [name, ...rest] = cookie.trim().split('=');
+    return { name, value: rest.join('=') };
+  });
+}
 
-// Only create the client if we have the URL, otherwise we might be in a context where it's not needed (e.g. client side without public env vars)
-// or we want to fail gracefully. However, for now we let it throw if used, but we try to avoid top-level throw if possible
-// or just rely on the fact that if this file is imported for the client, it implies intent to use it.
-// The issue was importing DEFAULT_USER_ID triggered this side effect.
+export const createSupabaseServerInstance = (context: {
+  headers: Headers;
+  cookies: AstroCookies;
+}) => {
+  const supabase = createServerClient<Database>(
+    import.meta.env.SUPABASE_URL,
+    import.meta.env.SUPABASE_KEY,
+    {
+      cookieOptions,
+      cookies: {
+        getAll() {
+          return parseCookieHeader(context.headers.get('Cookie') ?? '');
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            context.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
 
-export const supabaseClient = createClient<Database>(supabaseUrl || '', supabaseAnonKey || '');
+  return supabase;
+};
 
 export * from '../config/constants';
-
-

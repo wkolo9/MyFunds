@@ -1,0 +1,15 @@
+---
+// Handler for callback
+// Currently just redirects to home or reset-password depending on flow
+// In a real app this would handle the code exchange
+
+const { searchParams } = Astro.url;
+const code = searchParams.get('code');
+
+if (code) {
+  // Mock redirection logic based on spec
+  return Astro.redirect('/auth/reset-password');
+}
+
+return Astro.redirect('/auth/login?error=invalid_code');
+---

@@ -13,7 +13,7 @@ export const GET: APIRoute = async (context) => {
     const user = await getAuthenticatedUser(context);
     if (!user) {
       return createErrorResponseObject(
-        ErrorCode.INVALID_TOKEN,
+        ErrorCode.MISSING_AUTH_HEADER,
         'Missing or invalid authorization token',
         401
       );
@@ -38,7 +38,7 @@ export const POST: APIRoute = async (context) => {
     const user = await getAuthenticatedUser(context);
     if (!user) {
       return createErrorResponseObject(
-        ErrorCode.INVALID_TOKEN,
+        ErrorCode.MISSING_AUTH_HEADER,
         'Missing or invalid authorization token',
         401
       );
@@ -65,14 +65,36 @@ export const POST: APIRoute = async (context) => {
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const sectorService = createSectorService(supabase);
 
-    const sector = await sectorService.createSector(user.id, validation.data);
+    try {
+        const sector = await sectorService.createSector(user.id, validation.data);
+        return new Response(JSON.stringify(sector), {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    } catch (err: any) {
+        // Check for specific database errors that might indicate missing profile
+        if (err.message && err.message.includes('foreign key constraint') && err.message.includes('sectors_user_id_fkey')) {
+             console.error('Missing profile for user, attempting to create one...');
+             // Try to ensure profile exists
+             const { error: profileError } = await supabase.from('profiles').upsert({ user_id: user.id }, { onConflict: 'user_id', ignoreDuplicates: true });
+             
+             if (profileError) {
+                 console.error('Failed to create profile:', profileError);
+                 throw err;
+             }
+             
+             // Retry sector creation
+             const sector = await sectorService.createSector(user.id, validation.data);
+             return new Response(JSON.stringify(sector), {
+                status: 201,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        throw err;
+    }
 
-    return new Response(JSON.stringify(sector), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
   } catch (error) {
+    console.error('Error in POST /api/sectors:', error);
     return handleServiceError(error);
   }
 };
-

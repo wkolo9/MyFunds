@@ -87,12 +87,12 @@ Kryteria akceptacji:
 2.  Walidacja po stronie klienta sprawdza, czy hasła się zgadzają.
 3.  Walidacja po stronie serwera sprawdza, czy e-mail nie jest już zajęty.
 4.  Walidacja po stronie serwera sprawdza, czy hasło ma co najmniej 8 znaków.
-5.  Po pomyślnej rejestracji, użytkownik otrzymuje informację o konieczności weryfikacji e-mail (mechanizm weryfikacji jest podstawowy).
-6.  Użytkownik nie może się zalogować przed weryfikacją e-mail (jeśli dotyczy).
+5.  Po pomyślnej rejestracji, użytkownik jest automatycznie logowany (lub przekierowywany do logowania) i uzyskuje dostęp do aplikacji.
+6.  Weryfikacja e-mail jest opcjonalna w MVP i nie blokuje dostępu do konta.
 
 ID: US-002
 Tytuł: Logowanie użytkownika
-Opis: Jako zarejestrowany użytkownik, chcę móc zalogować się do aplikacji podając mój e-mail i hasło, aby uzyskać dostęp do mojego portfela.
+Opis: Jako zarejestrowany użytkownik, chcę móc zalogować się do aplikacji podając mój e-mail i hasło, aby uzyskać dostęp do aplikacji.
 Kryteria akceptacji:
 1.  Formularz logowania zawiera pola: e-mail, hasło.
 2.  Po pomyślnym zalogowaniu, użytkownik jest przekierowany do swojego pulpitu (np. strony portfela).

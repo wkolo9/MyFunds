@@ -24,7 +24,7 @@ export const PATCH: APIRoute = async (context) => {
     const user = await getAuthenticatedUser(context);
     if (!user) {
       return createErrorResponseObject(
-        ErrorCode.INVALID_TOKEN,
+        ErrorCode.MISSING_AUTH_HEADER,
         'Missing or invalid authorization token',
         401
       );
@@ -78,7 +78,7 @@ export const DELETE: APIRoute = async (context) => {
     const user = await getAuthenticatedUser(context);
     if (!user) {
       return createErrorResponseObject(
-        ErrorCode.INVALID_TOKEN,
+        ErrorCode.MISSING_AUTH_HEADER,
         'Missing or invalid authorization token',
         401
       );
@@ -96,4 +96,3 @@ export const DELETE: APIRoute = async (context) => {
     return handleServiceError(error);
   }
 };
-

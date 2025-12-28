@@ -1,6 +1,6 @@
 ---
 import { cn } from "@/lib/utils";
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 
 const { pathname } = Astro.url;
 
@@ -30,7 +30,7 @@ const inactiveClasses = "bg-card text-muted-foreground border-border hover:bg-ac
       Watchlist
     </a>
   </div>
-  <div class="absolute right-4 top-full mt-2">
+  <div class="absolute right-4 top-full mt-2 flex items-center gap-2">
     <a
       href="/profile"
       class="p-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -38,6 +38,14 @@ const inactiveClasses = "bg-card text-muted-foreground border-border hover:bg-ac
     >
       <User className="w-6 h-6" />
     </a>
+    <form action="/api/auth/logout" method="POST" class="flex">
+      <button
+        type="submit"
+        class="p-2 text-muted-foreground hover:text-foreground transition-colors"
+        aria-label="Sign out"
+      >
+        <LogOut className="w-6 h-6" />
+      </button>
+    </form>
   </div>
 </nav>
-
