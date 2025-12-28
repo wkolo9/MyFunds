@@ -55,8 +55,6 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
       setNewSectorName('');
     } catch (error) {
       console.error('Failed to create sector', error);
-      // Toast should be handled by onNewSector or parent usually, but here onNewSector returns ID, so parent might not handle UI error if it throws.
-      // Assuming parent handles error logic or we catch it here.
     } finally {
       setIsSubmitting(false);
     }
