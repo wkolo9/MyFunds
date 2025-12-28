@@ -32,8 +32,8 @@ export function PortfolioDashboard() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)] p-4 md:p-8 space-y-6">
       <div className="flex flex-col space-y-2 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-100">Portfolio</h1>
-        <p className="text-slate-400">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Portfolio</h1>
+        <p className="text-muted-foreground">
           Manage your assets and view your portfolio performance.
         </p>
       </div>

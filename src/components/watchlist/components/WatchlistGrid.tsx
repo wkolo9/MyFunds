@@ -58,7 +58,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({ items, onReorder, 
 
   if (items.length === 0) {
     return (
-        <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/50 text-slate-400">
+        <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted/50 text-muted-foreground">
             <p>Your watchlist is empty.</p>
             <p className="text-sm">Add a ticker above to get started.</p>
         </div>

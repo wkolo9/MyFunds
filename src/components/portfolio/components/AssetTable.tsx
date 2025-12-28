@@ -120,14 +120,14 @@ export function AssetTable({ assets, currency, onEdit, onDelete }: AssetTablePro
 
   if (!assets || assets.length === 0) {
       return (
-          <div className="p-8 text-center border rounded-md text-muted-foreground">
+          <div className="p-8 text-center border rounded-md text-muted-foreground bg-card">
               No assets in portfolio. Add one to get started.
           </div>
       )
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border bg-card text-card-foreground">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

@@ -43,17 +43,17 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({
   return (
     <div className="flex flex-col gap-4 pb-6 md:flex-row md:items-center md:justify-between">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-100">Watchlist</h1>
-        <p className="text-slate-400">Monitor your favorite stocks in real-time.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Watchlist</h1>
+        <p className="text-muted-foreground">Monitor your favorite stocks in real-time.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex w-full max-w-sm items-center space-x-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Add Ticker (e.g. AAPL)"
-            className="pl-9 bg-slate-950 border-slate-800 focus:border-slate-700"
+            className="pl-9"
             value={ticker}
             onChange={(e) => setTicker(e.target.value)}
             disabled={isSubmitting}
@@ -62,10 +62,9 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({
         <Button 
           type="submit" 
           disabled={isSubmitting || !ticker.trim()}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white"
         >
           {isSubmitting ? (
-             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white" />
+             <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/50 border-t-primary-foreground" />
           ) : (
             <>
               <Plus className="mr-2 h-4 w-4" /> Add

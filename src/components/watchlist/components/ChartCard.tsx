@@ -13,22 +13,22 @@ interface ChartCardProps {
 
 export const ChartCard: React.FC<ChartCardProps> = ({ item, onDelete, dragHandleProps }) => {
   return (
-    <Card className="flex h-[320px] flex-col overflow-hidden bg-slate-950 border-slate-800">
+    <Card className="flex h-[320px] flex-col overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2 pb-0">
         <div className="flex items-center gap-2">
           {dragHandleProps && (
              <Button
              variant="ghost"
              size="icon"
-             className="h-6 w-6 cursor-grab text-slate-500 hover:text-slate-300 active:cursor-grabbing"
+             className="h-6 w-6 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
              {...dragHandleProps}
            >
              <GripVertical className="h-4 w-4" />
            </Button>
           )}
           <div className="flex flex-col">
-            <span className="font-bold text-slate-100">{item.ticker}</span>
-            <span className="text-xs text-slate-400">
+            <span className="font-bold text-card-foreground">{item.ticker}</span>
+            <span className="text-xs text-muted-foreground">
                 {/* TODO: Display price */}
                {/* Display price if available, otherwise just currency placeholder or fetch it */}
                {/* Note: In real app price might come from websocket or polling. 
@@ -42,7 +42,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({ item, onDelete, dragHandle
           variant="ghost" 
           size="icon" 
           onClick={onDelete}
-          className="h-6 w-6 text-slate-500 hover:text-red-400 hover:bg-transparent"
+          className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
         >
           <X className="h-4 w-4" />
         </Button>
