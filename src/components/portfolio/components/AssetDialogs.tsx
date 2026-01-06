@@ -72,7 +72,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" data-test-id="add-asset-dialog">
         <DialogHeader>
           <DialogTitle>Add Asset</DialogTitle>
         </DialogHeader>
@@ -84,6 +84,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
               placeholder="e.g. AAPL"
               {...register('ticker')}
               onChange={(e) => setValue('ticker', e.target.value.toUpperCase())}
+              data-test-id="asset-ticker-input"
             />
             {errors.ticker && (
               <p className="text-sm text-destructive">{errors.ticker.message}</p>
@@ -98,6 +99,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
               step="any"
               placeholder="e.g. 10"
               {...register('quantity')}
+              data-test-id="asset-quantity-input"
             />
             {errors.quantity && (
               <p className="text-sm text-destructive">{errors.quantity.message}</p>
@@ -117,7 +119,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} data-test-id="submit-asset-button">
               {isSubmitting ? 'Adding...' : 'Add Asset'}
             </Button>
           </DialogFooter>

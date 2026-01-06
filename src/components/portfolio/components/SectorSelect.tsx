@@ -70,6 +70,7 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
           disabled={isSubmitting}
           className="h-9"
           autoFocus
+          data-test-id="new-sector-name-input"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault(); // Prevent form submission if inside form
@@ -86,6 +87,7 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
           size="sm" 
           onClick={handleCreate}
           disabled={!newSectorName.trim() || isSubmitting}
+          data-test-id="confirm-new-sector-button"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
         </Button>
@@ -119,22 +121,22 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
       }}
       disabled={loading}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full" data-test-id="sector-select-trigger">
         <SelectValue placeholder={loading ? "Loading..." : "Select sector"} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
             {/* Treat 'null' as "Other" or "Unassigned" */}
-            <SelectItem value="null">Other</SelectItem>
+            <SelectItem value="null" data-test-id="sector-option-other">Other</SelectItem>
             {sectors.map((sector) => (
-            <SelectItem key={sector.id} value={sector.id}>
+            <SelectItem key={sector.id} value={sector.id} data-test-id={`sector-option-${sector.name.toLowerCase().replace(/\s+/g, '-')}`}>
                 {sector.name}
             </SelectItem>
             ))}
         </SelectGroup>
         <SelectSeparator />
         <SelectGroup>
-          <SelectItem value="create_new" className="font-medium text-primary cursor-pointer">
+          <SelectItem value="create_new" className="font-medium text-primary cursor-pointer" data-test-id="create-new-sector-option">
             <div className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Create new sector

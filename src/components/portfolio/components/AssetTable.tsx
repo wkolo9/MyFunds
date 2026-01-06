@@ -120,7 +120,7 @@ export function AssetTable({ assets, currency, onEdit, onDelete }: AssetTablePro
 
   if (!assets || assets.length === 0) {
       return (
-          <div className="p-8 text-center border rounded-md text-muted-foreground bg-card">
+          <div className="p-8 text-center border rounded-md text-muted-foreground bg-card" data-test-id="asset-table-empty">
               No assets in portfolio. Add one to get started.
           </div>
       )
@@ -147,7 +147,11 @@ export function AssetTable({ assets, currency, onEdit, onDelete }: AssetTablePro
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+            <TableRow 
+              key={row.id} 
+              data-state={row.getIsSelected() && 'selected'}
+              data-test-id={`asset-row-${row.original.ticker.toLowerCase()}`}
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

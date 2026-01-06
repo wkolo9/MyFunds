@@ -59,7 +59,7 @@ export function PortfolioDashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight">Assets</h2>
-              <Button onClick={() => setIsAddOpen(true)}>
+              <Button onClick={() => setIsAddOpen(true)} data-test-id="add-asset-button">
                   <Plus className="mr-2 h-4 w-4" /> Add Asset
               </Button>
           </div>
