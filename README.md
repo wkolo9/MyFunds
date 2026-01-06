@@ -48,6 +48,8 @@ This project uses a modern, performant, and scalable tech stack.
 | **Backend (BaaS)** | [Supabase](https://supabase.com/) | - | Provides PostgreSQL database, authentication, and instant APIs. |
 | **CI/CD** | [GitHub Actions](https://github.com/features/actions) | - | For automating build, test, and deployment pipelines. |
 | **Hosting** | [DigitalOcean](https://www.digitalocean.com/) | - | Target platform for hosting the production Docker image. |
+| **Unit Testing** | [Vitest](https://vitest.dev/) | `v4.x` | Blazing fast unit test framework powered by Vite. |
+| **E2E Testing** | [Playwright](https://playwright.dev/) | - | Reliable end-to-end testing for modern web apps. |
 
 ## 🚀 Getting Started Locally
 
