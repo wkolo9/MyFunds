@@ -1,17 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PortfolioService } from '../../../lib/services/portfolio.service';
 import { NotFoundError, ConflictError, ValidationError } from '../../../lib/utils/error.utils';
-import { marketService } from '../../../lib/services/market.service';
+
+// Use vi.hoisted for hoisted mocks
+const { mockMarketService } = vi.hoisted(() => ({
+  mockMarketService: {
+    getPrice: vi.fn(),
+    getExchangeRate: vi.fn(),
+  }
+}));
 
 // Mock dependencies
 const mockSupabase = {
   from: vi.fn(),
 } as any;
-
-const mockMarketService = {
-  getPrice: vi.fn(),
-  getExchangeRate: vi.fn(),
-};
 
 vi.mock('../../../lib/services/market.service', () => ({
   marketService: mockMarketService
@@ -26,7 +28,7 @@ describe('PortfolioService', () => {
     service = new PortfolioService(mockSupabase);
     
     // Reset Supabase mock chain
-    mockSupabase.from.mockReturnValue({
+    const mockBuilder = {
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
@@ -35,7 +37,24 @@ describe('PortfolioService', () => {
       is: vi.fn().mockReturnThis(),
       single: vi.fn(),
       maybeSingle: vi.fn(),
-    });
+      then: vi.fn(), // Make it thenable/awaitable
+    };
+    // Initialize then to resolve to something default if needed, or leave it to tests
+    // But then needs to behave like a promise then
+    // Actually, if we mock 'then', we can control what it resolves to using mockResolvedValue on it?
+    // No, 'then' on a promise takes callbacks. 
+    // If we want it to be awaited, the runner calls .then(resolve, reject).
+    // So mocking .then as a simple vi.fn() might not work if we just want to set return value.
+    // Better: make the object a Promise-like or use a getter.
+    // But for simplicity in tests, we can just assume we configure 'then' implementation or use a helper.
+    // However, the easiest way to mock the result of `await chain` is `chain.then.mockImplementation((res) => res(value))`
+    
+    // Let's use a simpler approach: 
+    // We let 'then' be a mock function. We can configure it in tests.
+    // But to make it work as a promise by default, we can set default implementation.
+    mockBuilder.then.mockImplementation((resolve) => resolve({ data: [], error: null }));
+    
+    mockSupabase.from.mockReturnValue(mockBuilder);
   });
 
   describe('getAssets', () => {
@@ -105,7 +124,7 @@ describe('PortfolioService', () => {
   describe('createAsset', () => {
     it('should create asset if valid', async () => {
       // Setup
-      mockSupabase.from().select().eq.maybeSingle.mockResolvedValue({ data: null }); // No duplicate
+      mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: null }); // No duplicate
       mockMarketService.getPrice.mockResolvedValue({ ticker: 'AAPL', price: 150 }); // Valid ticker
       
       const newAsset = { 
@@ -131,7 +150,7 @@ describe('PortfolioService', () => {
 
     it('should throw conflict if ticker exists', async () => {
       // Setup
-      mockSupabase.from().select().eq.maybeSingle.mockResolvedValue({ data: { id: 'existing' } });
+      mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: { id: 'existing' } });
 
       // Execute & Verify
       await expect(service.createAsset(userId, { ticker: 'AAPL', quantity: '5' }))
@@ -140,7 +159,7 @@ describe('PortfolioService', () => {
 
     it('should throw validation error if ticker invalid', async () => {
         // Setup
-        mockSupabase.from().select().eq.maybeSingle.mockResolvedValue({ data: null });
+        mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: null });
         mockMarketService.getPrice.mockRejectedValue(new NotFoundError('Asset'));
   
         // Execute & Verify
@@ -152,7 +171,7 @@ describe('PortfolioService', () => {
   describe('updateAsset', () => {
       it('should update asset', async () => {
           // Setup
-          mockSupabase.from().select().eq.maybeSingle.mockResolvedValue({ data: { id: '1' } }); // Exists
+          mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: { id: '1' } }); // Exists
           
           const updatedAsset = {
               id: '1',
@@ -180,9 +199,15 @@ describe('PortfolioService', () => {
   describe('deleteAsset', () => {
       it('should delete existing asset', async () => {
           // Setup
-          mockSupabase.from().select().eq.maybeSingle.mockResolvedValue({ data: { id: '1' } }); // Exists
-          mockSupabase.from().delete().eq().eq.mockResolvedValue({ error: null });
-
+          mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: { id: '1' } }); // Exists
+          // For delete, we await the chain directly. So we configure 'then'.
+          // Since 'then' is called by the runtime, we need to mock implementation to call resolve.
+          // Or simpler: mockSupabase.from().delete().eq().eq() returns the builder.
+          // The builder has 'then'.
+          // We can just verify the call happened. The default mock implementation of 'then' (added in beforeEach) resolves to success.
+          // If we need specific return:
+          // mockSupabase.from().delete().eq().eq().then.mockImplementation((resolve) => resolve({ error: null }));
+          
           // Execute
           await service.deleteAsset(userId, '1');
 
@@ -192,7 +217,7 @@ describe('PortfolioService', () => {
 
       it('should throw not found if asset does not exist', async () => {
         // Setup
-        mockSupabase.from().select().eq.maybeSingle.mockResolvedValue({ data: null }); 
+        mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: null }); 
 
         // Execute & Verify
         await expect(service.deleteAsset(userId, '999'))
@@ -200,4 +225,3 @@ describe('PortfolioService', () => {
     });
   });
 });
-

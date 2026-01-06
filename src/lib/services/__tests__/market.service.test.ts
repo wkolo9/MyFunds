@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MarketDataService } from '../market.service';
 
-// Mock yahoo-finance2
-vi.mock('yahoo-finance2', () => ({
-  default: {
-    quote: vi.fn(),
-  },
+const mocks = vi.hoisted(() => ({
+  quote: vi.fn(),
 }));
 
-import yahooFinance from 'yahoo-finance2';
+// Mock yahoo-finance2
+vi.mock('yahoo-finance2', () => {
+  return {
+    default: class {
+      quote = mocks.quote;
+    }
+  };
+});
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -19,10 +23,6 @@ describe('MarketDataService', () => {
   beforeEach(() => {
     // Clear mocks
     vi.clearAllMocks();
-    // Reset singleton instance if possible or just get the instance
-    // Since it's a singleton, state might persist. Ideally we would allow resetting it.
-    // For this test, we assume fresh state or we will just test logic that is robust enough.
-    // However, since we can't easily reset private singleton instance, we rely on mocks being called.
     service = MarketDataService.getInstance();
     
     // Hack to clear cache for testing purposes
@@ -35,13 +35,13 @@ describe('MarketDataService', () => {
       const mockTicker = 'AAPL';
       const mockPrice = 150.50;
 
-      (yahooFinance.quote as any).mockResolvedValue({
+      mocks.quote.mockResolvedValue({
         regularMarketPrice: mockPrice,
       });
 
       const result = await service.getPrice(mockTicker);
 
-      expect(yahooFinance.quote).toHaveBeenCalledWith(mockTicker);
+      expect(mocks.quote).toHaveBeenCalledWith(mockTicker);
       expect(result).toEqual({
         ticker: mockTicker,
         price: mockPrice,
@@ -55,7 +55,7 @@ describe('MarketDataService', () => {
       const mockTicker = 'GOOGL';
       const mockPrice = 2800.00;
 
-      (yahooFinance.quote as any).mockResolvedValue({
+      mocks.quote.mockResolvedValue({
         regularMarketPrice: mockPrice,
       });
 
@@ -65,7 +65,7 @@ describe('MarketDataService', () => {
       // Second call - cache hit
       const result = await service.getPrice(mockTicker);
 
-      expect(yahooFinance.quote).toHaveBeenCalledTimes(1); // Should only be called once
+      expect(mocks.quote).toHaveBeenCalledTimes(1); // Should only be called once
       expect(result.cached).toBe(true);
       expect(result.price).toBe(mockPrice);
     });
@@ -73,7 +73,7 @@ describe('MarketDataService', () => {
     it('should throw NotFoundError if yahoo-finance2 throws error', async () => {
       const mockTicker = 'INVALID';
       
-      (yahooFinance.quote as any).mockRejectedValue(new Error('Not Found'));
+      mocks.quote.mockRejectedValue(new Error('Not Found'));
 
       await expect(service.getPrice(mockTicker)).rejects.toThrow('Asset INVALID not found');
     });
@@ -133,4 +133,3 @@ describe('MarketDataService', () => {
     });
   });
 });
-
