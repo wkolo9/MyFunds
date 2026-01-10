@@ -48,7 +48,7 @@ export function PortfolioDashboard() {
               isLoading={isLoading || isRefreshing}
             />
           </div>
-          <div className="col-span-1 md:col-span-1 lg:col-span-3 h-[300px]">
+          <div className="col-span-1 md:col-span-1 lg:col-span-3">
                <SectorAllocationChart 
                   data={summary?.sectors || []} 
                   currency={currency} 

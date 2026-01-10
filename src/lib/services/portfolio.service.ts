@@ -48,20 +48,21 @@ export class PortfolioService {
       throw new DatabaseError(error.message);
     }
 
-    // 2. Fetch exchange rate if needed
-
+    // 2. Prepare target currency
     const targetCurrency = options.currency || 'USD';
-    let exchangeRate = 1;
-    if (targetCurrency === 'PLN') {
-      const rateData = await marketService.getExchangeRate();
-      exchangeRate = rateData.rate;
-    }
 
     // 3. Enrich assets
     const enrichedAssets: PortfolioAssetDTO[] = await Promise.all(
       (assets || []).map(async (asset) => {
         try {
           const priceData = await marketService.getPrice(asset.ticker);
+          let exchangeRate = 1;
+          
+          if (priceData.currency !== targetCurrency) {
+             const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
+             exchangeRate = rateData.rate;
+          }
+
           const priceInTargetCurrency = priceData.price * exchangeRate;
           const quantity = parseFloat(asset.quantity);
           const currentValue = quantity * priceInTargetCurrency;
@@ -211,9 +212,16 @@ export class PortfolioService {
     // 5. Return enriched DTO
     // We can fetch just this one asset price
     const priceData = await marketService.getPrice(asset.ticker);
-    // Assuming USD for creation response or we could fetch profile preference.
-    // For simplicity, returning in USD as base currency.
-    const currentPrice = priceData.price;
+    
+    // Normalize to USD for creation response
+    const targetCurrency = 'USD';
+    let exchangeRate = 1;
+    if (priceData.currency !== targetCurrency) {
+         const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
+         exchangeRate = rateData.rate;
+    }
+
+    const currentPrice = priceData.price * exchangeRate;
     const currentValue = parseFloat(asset.quantity) * currentPrice;
 
     // @ts-ignore
@@ -224,7 +232,7 @@ export class PortfolioService {
       sector_name: sectorName,
       current_price: currentPrice,
       current_value: currentValue,
-      currency: 'USD' 
+      currency: targetCurrency 
     };
   }
 
@@ -278,7 +286,16 @@ export class PortfolioService {
 
     // 4. Enrich
     const priceData = await marketService.getPrice(updatedAsset.ticker);
-    const currentPrice = priceData.price;
+    
+    // Normalize to USD
+    const targetCurrency = 'USD';
+    let exchangeRate = 1;
+    if (priceData.currency !== targetCurrency) {
+         const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
+         exchangeRate = rateData.rate;
+    }
+
+    const currentPrice = priceData.price * exchangeRate;
     const currentValue = parseFloat(updatedAsset.quantity) * currentPrice;
 
     // @ts-ignore
@@ -289,7 +306,7 @@ export class PortfolioService {
       sector_name: sectorName,
       current_price: currentPrice,
       current_value: currentValue,
-      currency: 'USD'
+      currency: targetCurrency
     };
   }
 

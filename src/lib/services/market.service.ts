@@ -12,7 +12,8 @@ const yahooFinance = new YahooFinance({
 import type { 
   AssetPriceDTO, 
   ExchangeRateDTO, 
-  MarketDataStatusDTO
+  MarketDataStatusDTO,
+  Currency
 } from '@/types';
 import { NotFoundError, ErrorCode, createErrorResponse } from '@/lib/utils/error.utils';
 
@@ -23,8 +24,8 @@ interface CacheEntry<T> {
 }
 
 interface MarketCache {
-  prices: Map<string, CacheEntry<number>>;
-  exchangeRate: CacheEntry<number> | null;
+  prices: Map<string, CacheEntry<{ price: number; currency: Currency }>>;
+  exchangeRates: Map<string, CacheEntry<number>>;
 }
 
 // Configuration
@@ -41,7 +42,7 @@ export class MarketDataService {
   private constructor() {
     this.cache = {
       prices: new Map(),
-      exchangeRate: null,
+      exchangeRates: new Map(),
     };
   }
 
@@ -65,8 +66,8 @@ export class MarketDataService {
     if (cachedEntry && (now - cachedEntry.timestamp < CACHE_TTL_MS)) {
       return {
         ticker: normalizedTicker,
-        price: cachedEntry.data,
-        currency: 'USD', // Defaulting to USD as per plan
+        price: cachedEntry.data.price,
+        currency: cachedEntry.data.currency,
         timestamp: new Date(cachedEntry.timestamp).toISOString(),
         cached: true,
       };
@@ -74,18 +75,18 @@ export class MarketDataService {
 
     // Fetch from Yahoo Finance (Cache Miss)
     try {
-        const price = await this.fetchPrice(normalizedTicker);
+        const data = await this.fetchPrice(normalizedTicker);
         
         // Update cache
         this.cache.prices.set(normalizedTicker, {
-          data: price,
+          data,
           timestamp: now,
         });
 
         return {
           ticker: normalizedTicker,
-          price,
-          currency: 'USD',
+          price: data.price,
+          currency: data.currency,
           timestamp: new Date(now).toISOString(),
           cached: false,
         };
@@ -96,8 +97,8 @@ export class MarketDataService {
         if (cachedEntry) {
              return {
                 ticker: normalizedTicker,
-                price: cachedEntry.data,
-                currency: 'USD',
+                price: cachedEntry.data.price,
+                currency: cachedEntry.data.currency,
                 timestamp: new Date(cachedEntry.timestamp).toISOString(),
                 cached: true,
              };
@@ -107,34 +108,46 @@ export class MarketDataService {
   }
 
   /**
-   * Get USD to PLN exchange rate
+   * Get exchange rate between two currencies
    */
-  public async getExchangeRate(): Promise<ExchangeRateDTO> {
+  public async getExchangeRate(from: Currency = 'USD', to: Currency = 'PLN'): Promise<ExchangeRateDTO> {
+    if (from === to) {
+        return {
+            from,
+            to,
+            rate: 1,
+            timestamp: new Date().toISOString(),
+            cached: true
+        };
+    }
+
+    const key = `${from}-${to}`;
     const now = Date.now();
     
     // Check cache
-    if (this.cache.exchangeRate && (now - this.cache.exchangeRate.timestamp < CACHE_TTL_MS)) {
+    const cachedEntry = this.cache.exchangeRates.get(key);
+    if (cachedEntry && (now - cachedEntry.timestamp < CACHE_TTL_MS)) {
       return {
-        from: 'USD',
-        to: 'PLN',
-        rate: this.cache.exchangeRate.data,
-        timestamp: new Date(this.cache.exchangeRate.timestamp).toISOString(),
+        from,
+        to,
+        rate: cachedEntry.data,
+        timestamp: new Date(cachedEntry.timestamp).toISOString(),
         cached: true,
       };
     }
 
-    // Fetch from Frankfurter API (Cache Miss)
-    const rate = await this.fetchExchangeRate();
+    // Fetch (Cache Miss)
+    const rate = await this.fetchExchangeRate(from, to);
 
     // Update cache
-    this.cache.exchangeRate = {
+    this.cache.exchangeRates.set(key, {
       data: rate,
       timestamp: now,
-    };
+    });
 
     return {
-      from: 'USD',
-      to: 'PLN',
+      from,
+      to,
       rate,
       timestamp: new Date(now).toISOString(),
       cached: false,
@@ -160,7 +173,7 @@ export class MarketDataService {
 
   // --- Private Helpers ---
 
-  private async fetchPrice(ticker: string): Promise<number> {
+  private async fetchPrice(ticker: string): Promise<{ price: number; currency: Currency }> {
     try {
       // Use the imported singleton instance
       const quote = await yahooFinance.quote(ticker) as any;
@@ -169,7 +182,9 @@ export class MarketDataService {
          throw new NotFoundError(`Asset ${ticker}`);
       }
       
-      return quote.regularMarketPrice;
+      const currency = (quote.currency || 'USD').toUpperCase();
+      
+      return { price: quote.regularMarketPrice, currency };
     } catch (error: any) {
       if (error.message?.includes('Not Found') || error.name === 'NotFoundError') {
         throw new NotFoundError(`Asset ${ticker}`);
@@ -179,9 +194,9 @@ export class MarketDataService {
     }
   }
 
-  private async fetchExchangeRate(): Promise<number> {
+  private async fetchExchangeRate(from: Currency, to: Currency): Promise<number> {
     try {
-      const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=PLN');
+      const response = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
       
       if (!response.ok) {
         throw new Error(`Exchange rate API error: ${response.statusText}`);
@@ -189,11 +204,11 @@ export class MarketDataService {
 
       const data = await response.json();
       
-      if (!data || !data.rates || typeof data.rates.PLN !== 'number') {
+      if (!data || !data.rates || typeof data.rates[to] !== 'number') {
         throw new Error('Invalid exchange rate data format');
       }
 
-      return data.rates.PLN;
+      return data.rates[to];
     } catch (error) {
       console.error('Error fetching exchange rate:', error);
       throw error;

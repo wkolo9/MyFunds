@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
     setValue,
     watch,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<AssetFormData>({
     resolver: zodResolver(assetSchema),
@@ -57,12 +59,22 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
   }, [open, reset]);
 
   const handleFormSubmit = async (data: AssetFormData) => {
-    await onSubmit({
-      ticker: data.ticker.toUpperCase(),
-      quantity: data.quantity,
-      sector_id: data.sector_id,
-    });
-    onOpenChange(false);
+    try {
+      await onSubmit({
+        ticker: data.ticker.toUpperCase(),
+        quantity: data.quantity,
+        sector_id: data.sector_id,
+      });
+      onOpenChange(false);
+    } catch (error: any) {
+      if (error.message?.includes('Invalid ticker symbol')) {
+        setError('ticker', {
+          type: 'manual',
+          message: 'Invalid ticker symbol. Please verify the ticker.',
+        });
+        toast.error(`Invalid ticker symbol: ${data.ticker}`);
+      }
+    }
   };
 
   const createSector = async (name: string) => {
@@ -85,6 +97,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
               {...register('ticker')}
               onChange={(e) => setValue('ticker', e.target.value.toUpperCase())}
               data-test-id="asset-ticker-input"
+              aria-invalid={!!errors.ticker}
             />
             {errors.ticker && (
               <p className="text-sm text-destructive">{errors.ticker.message}</p>

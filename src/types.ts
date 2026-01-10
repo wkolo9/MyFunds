@@ -17,9 +17,10 @@
 
 /**
  * Supported currencies in the application
+ * NOTE: typed as string to support all currencies returned by market data provider
  */
 
-export type Currency = 'USD' | 'PLN';
+export type Currency = string;
 
 /**
  * Profile entity - represents user settings and preferences
