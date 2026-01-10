@@ -1,5 +1,13 @@
 import YahooFinance from 'yahoo-finance2';
-const yahooFinance = new YahooFinance();
+const yahooFinance = new YahooFinance({
+  fetch: async (url, init) => {
+    const headers = new Headers(init?.headers);
+    // Emulate a browser to avoid 429 rate limiting
+    headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    return fetch(url, { ...init, headers });
+  },
+  suppressNotices: ['yahooSurvey']
+});
 
 import type { 
   AssetPriceDTO, 
