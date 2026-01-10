@@ -1,22 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { PasswordInput } from '../ui/password-input';
 import { registerCommandSchema, type RegisterCommand } from '../../lib/validation/auth.validation';
+import { useAuth } from './hooks/useAuth';
 
 export function RegisterForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register: registerUser } = useAuth();
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterCommand>({
     resolver: zodResolver(registerCommandSchema),
     defaultValues: {
@@ -27,35 +26,7 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterCommand) => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || 'Failed to create account');
-      }
-      
-      const responseData = await response.json();
-      if (responseData.session) {
-          const { supabase } = await import('../../lib/utils/client-auth');
-          await supabase.auth.setSession(responseData.session);
-      }
-
-      toast.success('Account created successfully');
-      window.location.href = '/';
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create account');
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await registerUser(data);
   };
 
   return (
@@ -76,30 +47,12 @@ export function RegisterForm() {
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="••••••••"
-            {...register('password')}
-            disabled={isSubmitting}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            tabIndex={-1}
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-            <span className="sr-only">
-              {showPassword ? 'Hide password' : 'Show password'}
-            </span>
-          </button>
-        </div>
+        <PasswordInput
+          id="password"
+          placeholder="••••••••"
+          {...register('password')}
+          disabled={isSubmitting}
+        />
         <p className="text-xs text-muted-foreground">
           Must be at least 8 characters long
         </p>
@@ -110,30 +63,12 @@ export function RegisterForm() {
 
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <div className="relative">
-          <Input
-            id="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            placeholder="••••••••"
-            {...register('confirmPassword')}
-            disabled={isSubmitting}
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            tabIndex={-1}
-          >
-            {showConfirmPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-            <span className="sr-only">
-              {showConfirmPassword ? 'Hide password' : 'Show password'}
-            </span>
-          </button>
-        </div>
+        <PasswordInput
+          id="confirmPassword"
+          placeholder="••••••••"
+          {...register('confirmPassword')}
+          disabled={isSubmitting}
+        />
         {errors.confirmPassword && (
           <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
         )}
@@ -159,4 +94,3 @@ export function RegisterForm() {
     </form>
   );
 }
-

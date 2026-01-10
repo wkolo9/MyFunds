@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { PasswordInput } from '../ui/password-input';
 import { loginCommandSchema, type LoginCommand } from '../../lib/validation/auth.validation';
+import { useAuth } from './hooks/useAuth';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { login } = useAuth();
+  
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm<LoginCommand>({
     resolver: zodResolver(loginCommandSchema),
     defaultValues: {
@@ -25,39 +27,27 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginCommand) => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+    const result = await login(data);
+    if (!result.success && result.error) {
+      setError('root', {
+        type: 'manual',
+        message: result.error,
       });
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || 'Login failed');
-      }
-
-      const responseData = await response.json();
-      if (responseData.session) {
-          const { supabase } = await import('../../lib/utils/client-auth');
-          await supabase.auth.setSession(responseData.session);
-      }
-      
-      toast.success('Logged in successfully');
-      window.location.href = '/';
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Invalid email or password');
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {errors.root && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {errors.root.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -83,31 +73,13 @@ export function LoginForm() {
             Forgot password?
           </a>
         </div>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="••••••••"
-            {...register('password')}
-            disabled={isSubmitting}
-            data-test-id="password-input"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            tabIndex={-1}
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-            <span className="sr-only">
-              {showPassword ? 'Hide password' : 'Show password'}
-            </span>
-          </button>
-        </div>
+        <PasswordInput
+          id="password"
+          placeholder="••••••••"
+          {...register('password')}
+          disabled={isSubmitting}
+          data-test-id="password-input"
+        />
         {errors.password && (
           <p className="text-sm text-red-500">{errors.password.message}</p>
         )}

@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { ArrowLeft } from "lucide-react";
+import { Toaster } from "@/components/ui/sonner";
 
 interface Props {
   title: string;
@@ -50,8 +51,6 @@ const { title } = Astro.props;
 
       <slot />
     </div>
+    <Toaster client:load />
   </body>
 </html>
-
-
-

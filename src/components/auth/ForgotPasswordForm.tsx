@@ -2,20 +2,20 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { forgotPasswordCommandSchema, type ForgotPasswordCommand } from '../../lib/validation/auth.validation';
+import { useAuth } from './hooks/useAuth';
 
 export function ForgotPasswordForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { forgotPassword } = useAuth();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordCommand>({
     resolver: zodResolver(forgotPasswordCommandSchema),
     defaultValues: {
@@ -24,17 +24,9 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (data: ForgotPasswordCommand) => {
-    setIsSubmitting(true);
-    try {
-      // TODO: Implement actual forgot password logic
-      console.log('Forgot password data:', data);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
+    const success = await forgotPassword(data);
+    if (success) {
       setIsSuccess(true);
-    } catch (error) {
-      toast.error('Failed to send reset link');
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -98,6 +90,3 @@ export function ForgotPasswordForm() {
     </form>
   );
 }
-
-
-
