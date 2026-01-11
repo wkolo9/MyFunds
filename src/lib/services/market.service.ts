@@ -13,7 +13,8 @@ import type {
   AssetPriceDTO, 
   ExchangeRateDTO, 
   MarketDataStatusDTO,
-  Currency
+  Currency,
+  CandleData
 } from '@/types';
 import { NotFoundError, ErrorCode, createErrorResponse } from '@/lib/utils/error.utils';
 
@@ -104,6 +105,35 @@ export class MarketDataService {
              };
         }
         throw e;
+    }
+  }
+
+  /**
+   * Get historical candle data for an asset
+   */
+  public async getCandles(ticker: string, range: string = '1y'): Promise<CandleData[]> {
+    try {
+      const normalizedTicker = ticker.toUpperCase();
+      const period1 = new Date();
+      period1.setFullYear(period1.getFullYear() - 1); // Default to 1 year ago
+      const period2 = new Date(); // Now
+
+      const result = await yahooFinance.historical(normalizedTicker, {
+        period1: period1.toISOString().split('T')[0], // yyyy-mm-dd
+        period2: period2.toISOString().split('T')[0], // yyyy-mm-dd
+        interval: '1d',
+      });
+
+      return result.map((item: any) => ({
+        time: item.date.toISOString().split('T')[0], // yyyy-mm-dd
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+      }));
+    } catch (error) {
+      console.error(`Error fetching candles for ${ticker}:`, error);
+      throw error;
     }
   }
 

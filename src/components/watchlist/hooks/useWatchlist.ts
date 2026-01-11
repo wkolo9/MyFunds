@@ -67,7 +67,11 @@ export const useWatchlist = () => {
         ...prev,
         items: prev.items.filter(item => item.id !== tempId)
       }));
-      toast.error('Failed to add item');
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to add item');
+      }
     }
   }, [state.items]);
 

@@ -41,7 +41,7 @@ export const watchlistApi = {
 
   updatePositions: async (data: BatchUpdateWatchlistItemsCommand): Promise<BatchUpdateWatchlistItemsDTO> => {
     const headers = await getAuthHeaders();
-    const response = await fetch('/api/watchlist/positions', {
+    const response = await fetch('/api/watchlist', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

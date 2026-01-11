@@ -47,7 +47,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({ item, onDelete, dragHandle
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent className="flex-1 p-0 relative">
+      <CardContent className="flex-1 p-0 relative min-h-0">
         <CandleChart ticker={item.ticker} height={280} />
       </CardContent>
     </Card>

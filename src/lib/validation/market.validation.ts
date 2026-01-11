@@ -12,7 +12,7 @@ export const tickerSchema = z
   .string()
   .min(1, 'Ticker cannot be empty')
   .max(10, 'Ticker cannot exceed 10 characters')
-  .regex(/^[A-Z0-9]+$/, 'Ticker must be alphanumeric')
+  .regex(/^[A-Z0-9.\-^]+$/, 'Ticker must be alphanumeric')
   .transform((val) => val.toUpperCase());
 
 /**

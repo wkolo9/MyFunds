@@ -42,6 +42,9 @@ export const CandleChart: React.FC<CandleChartProps> = ({
       },
       width: chartContainerRef.current.clientWidth,
       height: height,
+      localization: {
+        locale: 'en-US',
+      },
       grid: {
         vertLines: { visible: false },
         horzLines: { color: '#334155' }, // slate-700
@@ -51,7 +54,11 @@ export const CandleChart: React.FC<CandleChartProps> = ({
       },
       timeScale: {
         borderVisible: false,
-        timeVisible: true,
+        visible: true,
+        timeVisible: false,
+        secondsVisible: false,
+        fixLeftEdge: true,
+        fixRightEdge: true,
       },
     });
 
@@ -69,7 +76,10 @@ export const CandleChart: React.FC<CandleChartProps> = ({
     // 3. Setup Resizing
     const handleResize = () => {
       if (chartContainerRef.current) {
-        chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+        chart.applyOptions({ 
+            width: chartContainerRef.current.clientWidth,
+            height: chartContainerRef.current.clientHeight
+        });
       }
     };
 
@@ -85,7 +95,7 @@ export const CandleChart: React.FC<CandleChartProps> = ({
         const chartData = await getCandles(ticker);
         
         if (!mounted) return;
-
+console.log(chartData);
         series.setData(chartData);
         chart.timeScale().fitContent();
         setLoading(false);
@@ -111,7 +121,7 @@ export const CandleChart: React.FC<CandleChartProps> = ({
   }, []); 
 
   return (
-    <div className="relative w-full" style={{ height }}>
+    <div className="relative w-full h-full">
       {/* Chart is always rendered */}
       <div ref={chartContainerRef} className="w-full h-full" />
       

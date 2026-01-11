@@ -1,5 +1,4 @@
 import React from 'react';
-import { Toaster } from 'sonner';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { WatchlistHeader } from './WatchlistHeader';
 import { WatchlistGrid } from './WatchlistGrid';
@@ -15,7 +14,6 @@ export const WatchlistView: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)] p-4 md:p-8 space-y-6">
-      <Toaster position="top-right" theme="dark" />
       
       <WatchlistHeader 
         onAddTicker={addItem} 
