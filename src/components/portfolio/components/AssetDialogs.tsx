@@ -3,6 +3,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
+import { Info } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -90,7 +97,19 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
         </DialogHeader>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ticker">Ticker</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="ticker">Ticker</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ticker format should match 'finance.yahoo.com' search. i.e. BTC-USD, XTB.WA</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <Input
               id="ticker"
               placeholder="e.g. AAPL"

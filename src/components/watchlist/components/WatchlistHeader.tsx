@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface WatchlistHeaderProps {
   onAddTicker: (ticker: string) => Promise<void>;
@@ -59,6 +65,21 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({
             disabled={isSubmitting}
           />
         </div>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" type="button">
+                <Info className="h-4 w-4" />
+                <span className="sr-only">Ticker info</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Ticker format should match 'finance.yahoo.com' search. i.e. BTC-USD, XTB.WA</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <Button 
           type="submit" 
           disabled={isSubmitting || !ticker.trim()}
