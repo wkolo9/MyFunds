@@ -24,7 +24,7 @@ export function DeleteSectorDialog({ open, sectorName, onConfirm, onCancel }: De
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
             This will permanently delete the sector <strong>{sectorName}</strong>. Assets currently assigned to this
-            sector will be moved to "Other".
+            sector will be moved to &quot;Other&quot;.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -4,7 +4,6 @@ import type { Database } from "../../db/database.types";
 
 import { createProfileService } from "../../lib/services/profile.service";
 import { createErrorResponseObject, handleServiceError, ErrorCode } from "../../lib/utils/error.utils";
-import type { ProfileDTO } from "../../types";
 import { updateProfileCommandSchema } from "../../lib/validation/profile.validation";
 import { getAuthenticatedUser } from "../../lib/utils/auth.utils";
 
@@ -31,7 +30,7 @@ export const GET: APIRoute = async (context) => {
     let profile = await profileService.getProfile(userId);
 
     // Auto-create profile if missing (similar to sector logic)
-    if (!profile || (profile as any).user_id !== userId) {
+    if (!profile || profile.user_id !== userId) {
       // Check if mocked data returned or truly missing
       // Try to ensure profile exists
       const { data: newProfile, error: profileError } = await supabase
@@ -73,7 +72,7 @@ export const PATCH: APIRoute = async (context) => {
     let body;
     try {
       body = await context.request.json();
-    } catch (e) {
+    } catch {
       return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
@@ -97,9 +96,11 @@ export const PATCH: APIRoute = async (context) => {
           "Content-Type": "application/json",
         },
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Handle PGRST116 (No rows found) - likely missing profile
-      if (err.code === "PGRST116") {
+      // Check if err is PostgrestError-like object
+      const error = err as { code?: string };
+      if (error.code === "PGRST116") {
         console.error("Profile missing during update, creating one...");
         // Create profile
         const { error: createError } = await supabase.from("profiles").insert({

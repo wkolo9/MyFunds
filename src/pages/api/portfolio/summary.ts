@@ -34,7 +34,7 @@ export const GET: APIRoute = async (context) => {
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const portfolioService = createPortfolioService(supabase);
-    // @ts-ignore
+    // @ts-expect-error - Supabase types are tricky with complex joins
     const result = await portfolioService.getSummary(userId, parseResult.data);
 
     return new Response(JSON.stringify(result), {

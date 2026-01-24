@@ -39,7 +39,7 @@ export const POST: APIRoute = async (context) => {
     let body;
     try {
       body = await context.request.json();
-    } catch (e) {
+    } catch {
       return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
@@ -58,13 +58,10 @@ export const POST: APIRoute = async (context) => {
         status: 201,
         headers: { "Content-Type": "application/json" },
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Check for specific database errors that might indicate missing profile
-      if (
-        err.message &&
-        err.message.includes("foreign key constraint") &&
-        err.message.includes("sectors_user_id_fkey")
-      ) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage.includes("foreign key constraint") && errorMessage.includes("sectors_user_id_fkey")) {
         console.error("Missing profile for user, attempting to create one...");
         // Try to ensure profile exists
         const { error: profileError } = await supabase

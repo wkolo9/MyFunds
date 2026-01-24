@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { GET, POST, PATCH } from "../watchlist/index";
+import { GET, POST } from "../watchlist/index";
 import { DELETE } from "../watchlist/[id]";
-import { WatchlistService } from "@/lib/services/watchlist.service";
 import { createWatchlistService } from "@/lib/services/watchlist.service";
 import { ErrorCode } from "@/lib/utils/error.utils";
 

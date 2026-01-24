@@ -8,7 +8,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function handleResponse<T>(response: Response): Promise<T> {
+export async function handleResponse<T = unknown>(response: Response): Promise<T> {
   if (!response.ok) {
     let errorMessage = `API Error: ${response.status} ${response.statusText}`;
     try {

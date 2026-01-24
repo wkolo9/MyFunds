@@ -77,6 +77,7 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
           placeholder="New sector name"
           disabled={isSubmitting}
           className="h-9"
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           data-test-id="new-sector-name-input"
           onKeyDown={(e) => {

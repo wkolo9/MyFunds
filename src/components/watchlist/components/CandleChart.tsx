@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { createChart, ColorType, type IChartApi, CandlestickSeries } from "lightweight-charts";
 import { getCandles } from "@/lib/commands/get-candles";
 
@@ -13,21 +13,30 @@ interface CandleChartProps {
   };
 }
 
-export const CandleChart: React.FC<CandleChartProps> = ({
-  ticker,
-  height = 300,
-  colors = {
-    up: "#22c55e", // green-500
-    down: "#ef4444", // red-500
-    background: "transparent",
-    text: "#9ca3af", // gray-400
-  },
-}) => {
+const DEFAULT_COLORS = {
+  up: "#22c55e", // green-500
+  down: "#ef4444", // red-500
+  background: "transparent",
+  text: "#9ca3af", // gray-400
+};
+
+export const CandleChart: React.FC<CandleChartProps> = ({ ticker, height = 300, colors = DEFAULT_COLORS }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<boolean>(false);
+
+  // Memoize colors to prevent unnecessary re-renders
+  const memoizedColors = useMemo(
+    () => ({
+      up: colors.up,
+      down: colors.down,
+      background: colors.background,
+      text: colors.text,
+    }),
+    [colors.up, colors.down, colors.background, colors.text]
+  );
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -37,8 +46,8 @@ export const CandleChart: React.FC<CandleChartProps> = ({
     // 1. Initialize Chart
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: colors.background },
-        textColor: colors.text,
+        background: { type: ColorType.Solid, color: memoizedColors.background },
+        textColor: memoizedColors.text,
       },
       width: chartContainerRef.current.clientWidth,
       height: height,
@@ -64,11 +73,11 @@ export const CandleChart: React.FC<CandleChartProps> = ({
 
     // 2. Add Series (v5 syntax)
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: colors.up,
-      downColor: colors.down,
+      upColor: memoizedColors.up,
+      downColor: memoizedColors.down,
       borderVisible: false,
-      wickUpColor: colors.up,
-      wickDownColor: colors.down,
+      wickUpColor: memoizedColors.up,
+      wickDownColor: memoizedColors.down,
     });
 
     chartRef.current = chart;
@@ -95,7 +104,6 @@ export const CandleChart: React.FC<CandleChartProps> = ({
         const chartData = await getCandles(ticker);
 
         if (!mounted) return;
-        console.log(chartData);
         series.setData(chartData);
         chart.timeScale().fitContent();
         setLoading(false);
@@ -117,7 +125,7 @@ export const CandleChart: React.FC<CandleChartProps> = ({
       chart.remove();
       chartRef.current = null;
     };
-  }, []);
+  }, [ticker, height, memoizedColors]);
 
   return (
     <div className="relative w-full h-full">

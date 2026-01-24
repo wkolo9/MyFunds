@@ -30,10 +30,11 @@ export function useProfileData() {
         isLoadingProfile: false,
         isLoadingSectors: false,
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       setState((prev) => ({
         ...prev,
-        error: err.message || "Failed to fetch data",
+        error: error.message || "Failed to fetch data",
         isLoadingProfile: false,
         isLoadingSectors: false,
       }));
@@ -49,8 +50,9 @@ export function useProfileData() {
     try {
       const updatedProfile = await profileApi.updateCurrency(currency);
       setState((prev) => ({ ...prev, profile: updatedProfile }));
-    } catch (err: any) {
-      setState((prev) => ({ ...prev, error: err.message || "Failed to update currency" }));
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setState((prev) => ({ ...prev, error: error.message || "Failed to update currency" }));
       throw err;
     }
   };
@@ -59,8 +61,9 @@ export function useProfileData() {
     try {
       const newSector = await profileApi.addSector(name);
       setState((prev) => ({ ...prev, sectors: [...prev.sectors, newSector] }));
-    } catch (err: any) {
-      if (err.status === 409) {
+    } catch (err: unknown) {
+      const error = err as { status?: number };
+      if (error.status === 409) {
         throw new Error("Sector with this name already exists");
       }
       throw err;
@@ -74,8 +77,9 @@ export function useProfileData() {
         ...prev,
         sectors: prev.sectors.map((s) => (s.id === id ? updatedSector : s)),
       }));
-    } catch (err: any) {
-      if (err.status === 409) {
+    } catch (err: unknown) {
+      const error = err as { status?: number };
+      if (error.status === 409) {
         throw new Error("Sector with this name already exists");
       }
       throw err;
@@ -83,15 +87,11 @@ export function useProfileData() {
   };
 
   const deleteSector = async (id: string) => {
-    try {
-      await profileApi.deleteSector(id);
-      setState((prev) => ({
-        ...prev,
-        sectors: prev.sectors.filter((s) => s.id !== id),
-      }));
-    } catch (err: any) {
-      throw err;
-    }
+    await profileApi.deleteSector(id);
+    setState((prev) => ({
+      ...prev,
+      sectors: prev.sectors.filter((s) => s.id !== id),
+    }));
   };
 
   return {

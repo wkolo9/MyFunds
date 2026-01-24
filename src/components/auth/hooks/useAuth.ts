@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { toast } from "sonner";
 import { AuthService } from "@/lib/services/auth.service";
 import { supabase } from "@/lib/utils/client-auth";

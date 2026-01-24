@@ -23,13 +23,16 @@ export function AssetTable({ assets, currency, onEdit, onDelete }: AssetTablePro
   const [sorting, setSorting] = useState<SortingState>([]);
   const columnHelper = createColumnHelper<PortfolioAssetDTO>();
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === "USD" ? "en-US" : "pl-PL", {
-      style: "currency",
-      currency: currency,
-      currencyDisplay: "code",
-    }).format(value);
-  };
+  const formatCurrency = React.useCallback(
+    (value: number) => {
+      return new Intl.NumberFormat(currency === "USD" ? "en-US" : "pl-PL", {
+        style: "currency",
+        currency: currency,
+        currencyDisplay: "code",
+      }).format(value);
+    },
+    [currency]
+  );
 
   const columns = useMemo(
     () => [
@@ -97,7 +100,7 @@ export function AssetTable({ assets, currency, onEdit, onDelete }: AssetTablePro
         ),
       }),
     ],
-    [currency, onEdit, onDelete]
+    [columnHelper, formatCurrency, onEdit, onDelete]
   );
 
   const table = useReactTable({

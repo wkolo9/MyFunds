@@ -1,3 +1,4 @@
+import type { Currency } from "@/types";
 import { Toaster, toast } from "sonner";
 import { UserSettingsCard } from "./components/UserSettingsCard";
 import { SectorManagementCard } from "./components/SectorManagementCard";
@@ -32,12 +33,13 @@ export function ProfileView() {
     // But initial fetch error needs to be shown.
   }
 
-  const handleCurrencyChange = async (currency: any) => {
+  const handleCurrencyChange = async (currency: Currency) => {
     try {
       await updateCurrency(currency);
       toast.success("Currency updated successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update currency");
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || "Failed to update currency");
     }
   };
 

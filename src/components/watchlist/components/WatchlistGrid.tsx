@@ -78,7 +78,12 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({ items, onReorder, 
       <DragOverlay>
         {activeId && activeItem ? (
           <div className="opacity-80">
-            <ChartCard item={activeItem} onDelete={() => {}} />
+            <ChartCard
+              item={activeItem}
+              onDelete={() => {
+                // no-op for drag overlay
+              }}
+            />
           </div>
         ) : null}
       </DragOverlay>

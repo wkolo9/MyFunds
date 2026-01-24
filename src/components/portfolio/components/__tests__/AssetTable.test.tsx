@@ -56,7 +56,7 @@ describe("AssetTable Component", () => {
   });
 
   it('displays "Other" when sector_name is null', () => {
-    // @ts-ignore - testing component behavior with null sector_name which can happen from API
+    // @ts-expect-error - testing component behavior with null sector_name which can happen from API
     const assetWithoutSector = createMockAsset({ sector_name: null });
     render(<AssetTable {...defaultProps} assets={[assetWithoutSector]} />);
 
@@ -104,7 +104,7 @@ describe("AssetTable Component", () => {
 
     // We need to check the order of rows.
     // We can do this by getting all rows and checking text content order.
-    const rows = screen.getAllByRole("row");
+    // const rows = screen.getAllByRole("row");
     // Row 0 is header. Row 1 and 2 are data.
 
     // Let's assume we want to check if they appear.
@@ -112,9 +112,10 @@ describe("AssetTable Component", () => {
     // A robust way:
     const cells = screen.getAllByRole("cell");
     // Finding ticker cells
-    const tickers = cells.filter((c) => c.textContent === "LOW" || c.textContent === "HIGH");
+    // const tickers = cells.filter((c) => c.textContent === "LOW" || c.textContent === "HIGH");
 
     // This is a basic interaction test to ensure the button is clickable and doesn't crash
     expect(sortButton).toBeInTheDocument();
+    expect(cells.length).toBeGreaterThan(0);
   });
 });

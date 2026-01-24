@@ -26,8 +26,9 @@ export function SectorManagementCard({ sectors, isLoading, onAdd, onEdit, onDele
     try {
       await onAdd(name);
       toast.success("Sector added successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to add sector");
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || "Failed to add sector");
     } finally {
       setIsAdding(false);
     }
@@ -37,8 +38,9 @@ export function SectorManagementCard({ sectors, isLoading, onAdd, onEdit, onDele
     try {
       await onEdit(id, name);
       toast.success("Sector name updated");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update sector");
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || "Failed to update sector");
       throw err; // Re-throw so the row component knows it failed
     }
   };
@@ -56,8 +58,9 @@ export function SectorManagementCard({ sectors, isLoading, onAdd, onEdit, onDele
     try {
       await onDelete(sectorToDelete.id);
       toast.success("Sector deleted successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete sector");
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || "Failed to delete sector");
     } finally {
       setSectorToDelete(null);
     }

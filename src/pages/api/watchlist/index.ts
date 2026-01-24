@@ -25,7 +25,7 @@ export const GET: APIRoute = async (context) => {
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const watchlistService = createWatchlistService(supabase);
-    const watchlist = await watchlistService.getWatchlist(userId!);
+    const watchlist = await watchlistService.getWatchlist(userId);
 
     return new Response(JSON.stringify(watchlist), {
       status: 200,
@@ -51,7 +51,7 @@ export const POST: APIRoute = async (context) => {
     let body;
     try {
       body = await context.request.json();
-    } catch (e) {
+    } catch {
       return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
@@ -63,7 +63,7 @@ export const POST: APIRoute = async (context) => {
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const watchlistService = createWatchlistService(supabase);
-    const newItem = await watchlistService.createWatchlistItem(userId!, parseResult.data);
+    const newItem = await watchlistService.createWatchlistItem(userId, parseResult.data);
 
     return new Response(JSON.stringify(newItem), {
       status: 201,
@@ -89,7 +89,7 @@ export const PATCH: APIRoute = async (context) => {
     let body;
     try {
       body = await context.request.json();
-    } catch (e) {
+    } catch {
       return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
@@ -101,7 +101,7 @@ export const PATCH: APIRoute = async (context) => {
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const watchlistService = createWatchlistService(supabase);
-    const result = await watchlistService.batchUpdateItems(userId!, parseResult.data);
+    const result = await watchlistService.batchUpdateItems(userId, parseResult.data);
 
     return new Response(JSON.stringify(result), {
       status: 200,

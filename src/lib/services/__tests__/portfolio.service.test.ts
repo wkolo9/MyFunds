@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { PortfolioService } from "../../../lib/services/portfolio.service";
 import { NotFoundError, ConflictError, ValidationError } from "../../../lib/utils/error.utils";

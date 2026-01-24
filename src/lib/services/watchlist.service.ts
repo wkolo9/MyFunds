@@ -173,7 +173,7 @@ export class WatchlistService {
 
     // 1. Fetch current state
     const currentItems = await this.fetchCurrentItems(userId);
-    const itemMap = new Map(currentItems.map((item) => [item.id, item]));
+    // const itemMap = new Map(currentItems.map((item) => [item.id, item]));
 
     // 2. Prepare and validate working state
     const workingState = this.applyUpdates(currentItems, command.updates);
@@ -275,7 +275,7 @@ export class WatchlistService {
         try {
           const priceData = await marketService.getPrice(item.ticker);
           return { ...item, current_price: priceData.price };
-        } catch (e) {
+        } catch {
           // Fallback for individual item failures
           return { ...item, current_price: 0 };
         }

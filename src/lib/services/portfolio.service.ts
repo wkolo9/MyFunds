@@ -70,7 +70,7 @@ export class PortfolioService {
           const quantity = parseFloat(asset.quantity);
           const currentValue = quantity * priceInTargetCurrency;
 
-          // @ts-ignore - Supabase types join handling
+          // @ts-expect-error - Supabase join types are not inferred correctly for sectors
           const sectorName = asset.sectors?.name || "Other";
 
           return {
@@ -84,7 +84,7 @@ export class PortfolioService {
           console.error(`Failed to fetch price for ${asset.ticker}`, err);
           return {
             ...asset,
-            // @ts-ignore
+            // @ts-expect-error - Supabase join types are not inferred correctly for sectors
             sector_name: asset.sectors?.name || "Other",
             current_price: 0,
             current_value: 0,
@@ -229,7 +229,7 @@ export class PortfolioService {
     const currentPrice = priceData.price * exchangeRate;
     const currentValue = parseFloat(asset.quantity) * currentPrice;
 
-    // @ts-ignore
+    // @ts-expect-error - Supabase join types are not inferred correctly for sectors
     const sectorName = asset.sectors?.name || "Other";
 
     return {
@@ -270,6 +270,7 @@ export class PortfolioService {
     }
 
     // 3. Update
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: any = {};
     if (command.quantity !== undefined) updates.quantity = command.quantity;
     if (command.sector_id !== undefined) updates.sector_id = command.sector_id;
@@ -305,7 +306,7 @@ export class PortfolioService {
     const currentPrice = priceData.price * exchangeRate;
     const currentValue = parseFloat(updatedAsset.quantity) * currentPrice;
 
-    // @ts-ignore
+    // @ts-expect-error - Supabase join types are not inferred correctly for sectors
     const sectorName = updatedAsset.sectors?.name || "Other";
 
     return {

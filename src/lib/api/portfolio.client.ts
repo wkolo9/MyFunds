@@ -60,6 +60,6 @@ export const portfolioApi = {
       method: "DELETE",
       headers,
     });
-    return handleResponse<void>(response);
+    await handleResponse(response);
   },
 };

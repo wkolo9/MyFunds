@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { PasswordInput } from "../ui/password-input";
 import { resetPasswordCommandSchema, type ResetPasswordCommand } from "../../lib/validation/auth.validation";

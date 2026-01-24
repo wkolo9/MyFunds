@@ -29,7 +29,7 @@ export const PATCH: APIRoute = async (context) => {
     let body;
     try {
       body = await context.request.json();
-    } catch (e) {
+    } catch {
       return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 

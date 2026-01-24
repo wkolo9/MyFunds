@@ -39,7 +39,7 @@ export function SectorRow({ sector, existingNames, onSave, onDeleteRequest }: Se
       await onSave(sector.id, trimmedName);
       setIsEditing(false);
       setError(null);
-    } catch (e) {
+    } catch {
       // Error handling is done in parent, but we can catch here if needed
     } finally {
       setIsSaving(false);
@@ -70,6 +70,7 @@ export function SectorRow({ sector, existingNames, onSave, onDeleteRequest }: Se
                   if (e.key === "Enter") handleSave();
                   if (e.key === "Escape") handleCancel();
                 }}
+                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
               {error && <p className="text-xs text-red-500">{error}</p>}

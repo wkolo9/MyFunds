@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SectorService } from "../sector.service";
@@ -176,11 +177,11 @@ describe("SectorService", () => {
         maybeSingle: vi.fn().mockResolvedValue({ data: { id: sectorId }, error: null }),
       };
 
-      const mockDeleteChain = {
-        delete: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        then: vi.fn().mockResolvedValue({ error: null }), // simulate promise-like behavior if needed, or just return mocks
-      };
+      // const mockDeleteChain = {
+      //   delete: vi.fn().mockReturnThis(),
+      //   eq: vi.fn().mockReturnThis(),
+      //   then: vi.fn().mockResolvedValue({ error: null }), // simulate promise-like behavior if needed, or just return mocks
+      // };
 
       // Fix for delete chain which doesn't usually return data unless select is used, but for mocking we just need it not to throw
       // In Supabase js client delete() returns a builder that is thenable.

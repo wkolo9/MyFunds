@@ -64,6 +64,6 @@ export const profileApi = {
       method: "DELETE",
       headers,
     });
-    return handleResponse<void>(response);
+    await handleResponse(response);
   },
 };

@@ -30,7 +30,7 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ onAddTicker, i
       setIsSubmitting(true);
       await onAddTicker(cleanTicker);
       setTicker("");
-    } catch (error) {
+    } catch {
       // Error is handled by the hook usually, but we catch here to stop loading state if needed
     } finally {
       setIsSubmitting(false);
@@ -66,7 +66,7 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ onAddTicker, i
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Ticker format should match 'finance.yahoo.com' search. i.e. BTC-USD, XTB.WA</p>
+              <p>Ticker format should match &quot;finance.yahoo.com&quot; search. i.e. BTC-USD, XTB.WA</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

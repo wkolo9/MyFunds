@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "../../ui/table";
 import { SectorRow } from "./SectorRow";
 import type { SectorDTO } from "@/types";
 

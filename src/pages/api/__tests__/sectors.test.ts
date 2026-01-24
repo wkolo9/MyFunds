@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { GET, POST } from "../sectors/index";
 import { PATCH, DELETE } from "../sectors/[id]";
 import { ErrorCode } from "@/lib/utils/error.utils";

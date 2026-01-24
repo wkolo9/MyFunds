@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/db/database.types";
 import { WatchlistService } from "../watchlist.service";
 import { marketService } from "../market.service";
-import type { WatchlistItemEntity, WatchlistItemDTO } from "@/types";
+import type { WatchlistItemEntity } from "@/types";
 
 // Mock marketService
 vi.mock("../market.service", () => ({

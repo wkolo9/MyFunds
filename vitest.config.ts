@@ -13,4 +13,4 @@ export default getViteConfig({
       exclude: ["src/env.d.ts", "src/types.ts"],
     },
   },
-} as any);
+});

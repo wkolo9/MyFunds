@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(JSON.stringify({ user: data.user, session: data.session }), {
       status: 200,
     });
-  } catch (e) {
+  } catch {
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
     });

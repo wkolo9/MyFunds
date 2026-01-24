@@ -35,7 +35,7 @@ export const GET: APIRoute = async (context) => {
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
     const portfolioService = createPortfolioService(supabase);
-    // @ts-ignore
+    // @ts-expect-error - Supabase types are tricky with complex joins
     const result = await portfolioService.getAssets(userId, parseResult.data);
 
     return new Response(JSON.stringify(result), {
@@ -63,7 +63,7 @@ export const POST: APIRoute = async (context) => {
     let body;
     try {
       body = await context.request.json();
-    } catch (e) {
+    } catch {
       return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 

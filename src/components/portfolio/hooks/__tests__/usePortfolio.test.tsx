@@ -1,14 +1,9 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { usePortfolio } from "../usePortfolio";
 import { portfolioApi } from "../../../../lib/api/portfolio.client";
 import { toast } from "sonner";
-import type {
-  PortfolioAssetDTO,
-  PortfolioSummaryDTO,
-  CreatePortfolioAssetCommand,
-  PortfolioListDTO,
-} from "../../../../types";
+import type { PortfolioSummaryDTO, CreatePortfolioAssetCommand, PortfolioListDTO } from "../../../../types";
 
 // Mock dependencies
 vi.mock("../../../../lib/api/portfolio.client", () => ({

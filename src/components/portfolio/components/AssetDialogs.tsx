@@ -62,8 +62,8 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
         sector_id: data.sector_id,
       });
       onOpenChange(false);
-    } catch (error: any) {
-      if (error.message?.includes("Invalid ticker symbol")) {
+    } catch (error) {
+      if (error instanceof Error && error.message?.includes("Invalid ticker symbol")) {
         setError("ticker", {
           type: "manual",
           message: "Invalid ticker symbol. Please verify the ticker.",
@@ -94,7 +94,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
                     <Info className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Ticker format should match 'finance.yahoo.com' search. i.e. BTC-USD, XTB.WA</p>
+                    <p>Ticker format should match &quot;finance.yahoo.com&quot; search. i.e. BTC-USD, XTB.WA</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

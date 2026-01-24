@@ -13,7 +13,7 @@ const yahooFinance = new YahooFinance({
 });
 
 import type { AssetPriceDTO, ExchangeRateDTO, MarketDataStatusDTO, Currency, CandleData } from "@/types";
-import { NotFoundError, ErrorCode, createErrorResponse } from "@/lib/utils/error.utils";
+import { NotFoundError } from "@/lib/utils/error.utils";
 
 // Cache interface
 interface CacheEntry<T> {
@@ -108,8 +108,13 @@ export class MarketDataService {
   /**
    * Get historical candle data for an asset
    */
-  public async getCandles(ticker: string, range = "1y"): Promise<CandleData[]> {
+  public async getCandles(
+    ticker: string, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _range = "1y"
+  ): Promise<CandleData[]> {
     try {
+      // range is currently unused but kept for interface compatibility
+      // We might use it to calculate period1 based on different ranges (1d, 1w, 1m, etc.)
       const normalizedTicker = ticker.toUpperCase();
       const period1 = new Date();
       period1.setFullYear(period1.getFullYear() - 1); // Default to 1 year ago
@@ -121,7 +126,7 @@ export class MarketDataService {
         interval: "1d",
       });
 
-      return result.map((item: any) => ({
+      return result.map((item: { date: Date; open: number; high: number; low: number; close: number }) => ({
         time: item.date.toISOString().split("T")[0], // yyyy-mm-dd
         open: item.open,
         high: item.high,
@@ -203,7 +208,10 @@ export class MarketDataService {
   private async fetchPrice(ticker: string): Promise<{ price: number; currency: Currency }> {
     try {
       // Use the imported singleton instance
-      const quote = (await yahooFinance.quote(ticker)) as any;
+      const quote = (await yahooFinance.quote(ticker)) as unknown as {
+        regularMarketPrice: number;
+        currency?: string;
+      };
 
       if (!quote || typeof quote.regularMarketPrice !== "number") {
         throw new NotFoundError(`Asset ${ticker}`);
@@ -212,8 +220,9 @@ export class MarketDataService {
       const currency = (quote.currency || "USD").toUpperCase();
 
       return { price: quote.regularMarketPrice, currency };
-    } catch (error: any) {
-      if (error.message?.includes("Not Found") || error.name === "NotFoundError") {
+    } catch (error: unknown) {
+      const err = error as Error | { message?: string; name?: string };
+      if (err.message?.includes("Not Found") || err.name === "NotFoundError") {
         throw new NotFoundError(`Asset ${ticker}`);
       }
       console.error(`Error fetching price for ${ticker}:`, error);

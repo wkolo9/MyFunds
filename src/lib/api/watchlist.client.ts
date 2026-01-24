@@ -36,7 +36,7 @@ export const watchlistApi = {
       method: "DELETE",
       headers,
     });
-    return handleResponse<void>(response);
+    await handleResponse(response);
   },
 
   updatePositions: async (data: BatchUpdateWatchlistItemsCommand): Promise<BatchUpdateWatchlistItemsDTO> => {
