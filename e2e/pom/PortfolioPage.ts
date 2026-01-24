@@ -1,5 +1,5 @@
-import { type Page, type Locator, expect } from '@playwright/test';
-import { AddAssetModal } from './AddAssetModal';
+import { type Page, type Locator, expect } from "@playwright/test";
+import { AddAssetModal } from "./AddAssetModal";
 
 export class PortfolioPage {
   readonly page: Page;
@@ -8,12 +8,12 @@ export class PortfolioPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.addAssetButton = page.getByTestId('add-asset-button');
+    this.addAssetButton = page.getByTestId("add-asset-button");
     this.addAssetModal = new AddAssetModal(page);
   }
 
   async goto() {
-    await this.page.goto('/portfolio');
+    await this.page.goto("/portfolio");
   }
 
   async clickAddAsset() {

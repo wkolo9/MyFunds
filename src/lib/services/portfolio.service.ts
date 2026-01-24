@@ -1,16 +1,16 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/db/database.types';
-import type { 
-  PortfolioAssetDTO, 
-  PortfolioListDTO, 
-  PortfolioSummaryDTO, 
-  CreatePortfolioAssetCommand, 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/db/database.types";
+import type {
+  PortfolioAssetDTO,
+  PortfolioListDTO,
+  PortfolioSummaryDTO,
+  CreatePortfolioAssetCommand,
   UpdatePortfolioAssetCommand,
   PortfolioFilterParams,
-  SectorBreakdownDTO
-} from '@/types';
-import { ValidationError, NotFoundError, DatabaseError, ConflictError } from '@/lib/utils/error.utils';
-import { marketService } from './market.service';
+  SectorBreakdownDTO,
+} from "@/types";
+import { ValidationError, NotFoundError, DatabaseError, ConflictError } from "@/lib/utils/error.utils";
+import { marketService } from "./market.service";
 
 export class PortfolioService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -20,25 +20,28 @@ export class PortfolioService {
    */
   async getAssets(userId: string, options: PortfolioFilterParams = {}): Promise<PortfolioListDTO> {
     if (!userId) {
-      throw new ValidationError('User ID is required', 'user_id');
+      throw new ValidationError("User ID is required", "user_id");
     }
 
     // 1. Fetch assets from DB
     let query = this.supabase
-      .from('portfolio_assets')
-      .select(`
+      .from("portfolio_assets")
+      .select(
+        `
         *,
         sectors (
           name
         )
-      `, { count: 'exact' })
-      .eq('user_id', userId);
+      `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId);
 
     if (options.sector_id) {
-      if (options.sector_id === 'null') {
-        query = query.is('sector_id', null);
+      if (options.sector_id === "null") {
+        query = query.is("sector_id", null);
       } else {
-        query = query.eq('sector_id', options.sector_id);
+        query = query.eq("sector_id", options.sector_id);
       }
     }
 
@@ -49,7 +52,7 @@ export class PortfolioService {
     }
 
     // 2. Prepare target currency
-    const targetCurrency = options.currency || 'USD';
+    const targetCurrency = options.currency || "USD";
 
     // 3. Enrich assets
     const enrichedAssets: PortfolioAssetDTO[] = await Promise.all(
@@ -57,35 +60,35 @@ export class PortfolioService {
         try {
           const priceData = await marketService.getPrice(asset.ticker);
           let exchangeRate = 1;
-          
+
           if (priceData.currency !== targetCurrency) {
-             const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
-             exchangeRate = rateData.rate;
+            const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
+            exchangeRate = rateData.rate;
           }
 
           const priceInTargetCurrency = priceData.price * exchangeRate;
           const quantity = parseFloat(asset.quantity);
           const currentValue = quantity * priceInTargetCurrency;
 
-          // @ts-ignore - Supabase types join handling
-          const sectorName = asset.sectors?.name || 'Other';
+          // @ts-expect-error - Supabase join types are not inferred correctly for sectors
+          const sectorName = asset.sectors?.name || "Other";
 
           return {
             ...asset,
             sector_name: sectorName,
             current_price: priceInTargetCurrency,
             current_value: currentValue,
-            currency: targetCurrency
+            currency: targetCurrency,
           };
         } catch (err) {
           console.error(`Failed to fetch price for ${asset.ticker}`, err);
           return {
             ...asset,
-            // @ts-ignore
-            sector_name: asset.sectors?.name || 'Other',
+            // @ts-expect-error - Supabase join types are not inferred correctly for sectors
+            sector_name: asset.sectors?.name || "Other",
             current_price: 0,
             current_value: 0,
-            currency: targetCurrency
+            currency: targetCurrency,
           };
         }
       })
@@ -113,12 +116,12 @@ export class PortfolioService {
     const sectorMap = new Map<string, SectorBreakdownDTO>();
 
     // Initialize "Other" sector
-    const otherSectorId = 'null'; // using string 'null' for map key
-    
+    const otherSectorId = "null"; // using string 'null' for map key
+
     for (const asset of assets) {
       const sectorId = asset.sector_id || otherSectorId;
       const sectorName = asset.sector_name;
-      
+
       const existing = sectorMap.get(sectorId);
       if (existing) {
         existing.value += asset.current_value;
@@ -127,21 +130,21 @@ export class PortfolioService {
           sector_id: asset.sector_id,
           sector_name: sectorName,
           value: asset.current_value,
-          percentage: 0 // Will calculate later
+          percentage: 0, // Will calculate later
         });
       }
     }
 
-    const sectors = Array.from(sectorMap.values()).map(sector => ({
+    const sectors = Array.from(sectorMap.values()).map((sector) => ({
       ...sector,
-      percentage: total_value > 0 ? (sector.value / total_value) * 100 : 0
+      percentage: total_value > 0 ? (sector.value / total_value) * 100 : 0,
     }));
 
     return {
       total_value,
       currency,
       sectors,
-      last_updated
+      last_updated,
     };
   }
 
@@ -149,14 +152,14 @@ export class PortfolioService {
    * Creates a new portfolio asset
    */
   async createAsset(userId: string, command: CreatePortfolioAssetCommand): Promise<PortfolioAssetDTO> {
-    if (!userId) throw new ValidationError('User ID is required', 'user_id');
+    if (!userId) throw new ValidationError("User ID is required", "user_id");
 
     // 1. Check duplicate ticker
     const { data: existing, error: checkError } = await this.supabase
-      .from('portfolio_assets')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('ticker', command.ticker)
+      .from("portfolio_assets")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("ticker", command.ticker)
       .maybeSingle();
 
     if (checkError) throw new DatabaseError(checkError.message);
@@ -169,7 +172,7 @@ export class PortfolioService {
       await marketService.getPrice(command.ticker);
     } catch (err) {
       if (err instanceof NotFoundError) {
-         throw new ValidationError(`Invalid ticker symbol: ${command.ticker}`, 'ticker');
+        throw new ValidationError(`Invalid ticker symbol: ${command.ticker}`, "ticker");
       }
       // If service unavailable, we might fail or proceed. Plan says 503 if provider unreachable.
       // But here we are validating input. If market service is down, we can't validate ticker.
@@ -179,32 +182,34 @@ export class PortfolioService {
 
     // 3. Verify sector if provided
     if (command.sector_id) {
-       const { data: sector, error: sectorError } = await this.supabase
-        .from('sectors')
-        .select('id')
-        .eq('id', command.sector_id)
-        .eq('user_id', userId)
+      const { data: sector, error: sectorError } = await this.supabase
+        .from("sectors")
+        .select("id")
+        .eq("id", command.sector_id)
+        .eq("user_id", userId)
         .maybeSingle();
-      
+
       if (sectorError) throw new DatabaseError(sectorError.message);
-      if (!sector) throw new NotFoundError('Sector not found');
+      if (!sector) throw new NotFoundError("Sector not found");
     }
 
     // 4. Insert
     const { data: asset, error: insertError } = await this.supabase
-      .from('portfolio_assets')
+      .from("portfolio_assets")
       .insert({
         user_id: userId,
         ticker: command.ticker,
         quantity: command.quantity,
-        sector_id: command.sector_id || null
+        sector_id: command.sector_id || null,
       })
-      .select(`
+      .select(
+        `
         *,
         sectors (
           name
         )
-      `)
+      `
+      )
       .single();
 
     if (insertError) throw new DatabaseError(insertError.message);
@@ -212,27 +217,27 @@ export class PortfolioService {
     // 5. Return enriched DTO
     // We can fetch just this one asset price
     const priceData = await marketService.getPrice(asset.ticker);
-    
+
     // Normalize to USD for creation response
-    const targetCurrency = 'USD';
+    const targetCurrency = "USD";
     let exchangeRate = 1;
     if (priceData.currency !== targetCurrency) {
-         const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
-         exchangeRate = rateData.rate;
+      const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
+      exchangeRate = rateData.rate;
     }
 
     const currentPrice = priceData.price * exchangeRate;
     const currentValue = parseFloat(asset.quantity) * currentPrice;
 
-    // @ts-ignore
-    const sectorName = asset.sectors?.name || 'Other';
+    // @ts-expect-error - Supabase join types are not inferred correctly for sectors
+    const sectorName = asset.sectors?.name || "Other";
 
     return {
       ...asset,
       sector_name: sectorName,
       current_price: currentPrice,
       current_value: currentValue,
-      currency: targetCurrency 
+      currency: targetCurrency,
     };
   }
 
@@ -242,71 +247,74 @@ export class PortfolioService {
   async updateAsset(userId: string, assetId: string, command: UpdatePortfolioAssetCommand): Promise<PortfolioAssetDTO> {
     // 1. Verify existence
     const { data: existing, error: findError } = await this.supabase
-      .from('portfolio_assets')
-      .select('*')
-      .eq('id', assetId)
-      .eq('user_id', userId)
+      .from("portfolio_assets")
+      .select("*")
+      .eq("id", assetId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (findError) throw new DatabaseError(findError.message);
-    if (!existing) throw new NotFoundError('Asset not found');
+    if (!existing) throw new NotFoundError("Asset not found");
 
     // 2. Verify sector if changing
     if (command.sector_id !== undefined && command.sector_id !== null) {
       const { data: sector, error: sectorError } = await this.supabase
-       .from('sectors')
-       .select('id')
-       .eq('id', command.sector_id)
-       .eq('user_id', userId)
-       .maybeSingle();
-     
-     if (sectorError) throw new DatabaseError(sectorError.message);
-     if (!sector) throw new NotFoundError('Sector not found');
-   }
+        .from("sectors")
+        .select("id")
+        .eq("id", command.sector_id)
+        .eq("user_id", userId)
+        .maybeSingle();
 
-   // 3. Update
-   const updates: any = {};
-   if (command.quantity !== undefined) updates.quantity = command.quantity;
-   if (command.sector_id !== undefined) updates.sector_id = command.sector_id;
+      if (sectorError) throw new DatabaseError(sectorError.message);
+      if (!sector) throw new NotFoundError("Sector not found");
+    }
 
-   const { data: updatedAsset, error: updateError } = await this.supabase
-     .from('portfolio_assets')
-     .update(updates)
-     .eq('id', assetId)
-     .eq('user_id', userId)
-     .select(`
+    // 3. Update
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updates: any = {};
+    if (command.quantity !== undefined) updates.quantity = command.quantity;
+    if (command.sector_id !== undefined) updates.sector_id = command.sector_id;
+
+    const { data: updatedAsset, error: updateError } = await this.supabase
+      .from("portfolio_assets")
+      .update(updates)
+      .eq("id", assetId)
+      .eq("user_id", userId)
+      .select(
+        `
         *,
         sectors (
           name
         )
-      `)
-     .single();
+      `
+      )
+      .single();
 
     if (updateError) throw new DatabaseError(updateError.message);
 
     // 4. Enrich
     const priceData = await marketService.getPrice(updatedAsset.ticker);
-    
+
     // Normalize to USD
-    const targetCurrency = 'USD';
+    const targetCurrency = "USD";
     let exchangeRate = 1;
     if (priceData.currency !== targetCurrency) {
-         const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
-         exchangeRate = rateData.rate;
+      const rateData = await marketService.getExchangeRate(priceData.currency, targetCurrency);
+      exchangeRate = rateData.rate;
     }
 
     const currentPrice = priceData.price * exchangeRate;
     const currentValue = parseFloat(updatedAsset.quantity) * currentPrice;
 
-    // @ts-ignore
-    const sectorName = updatedAsset.sectors?.name || 'Other';
+    // @ts-expect-error - Supabase join types are not inferred correctly for sectors
+    const sectorName = updatedAsset.sectors?.name || "Other";
 
     return {
       ...updatedAsset,
       sector_name: sectorName,
       current_price: currentPrice,
       current_value: currentValue,
-      currency: targetCurrency
+      currency: targetCurrency,
     };
   }
 
@@ -316,21 +324,21 @@ export class PortfolioService {
   async deleteAsset(userId: string, assetId: string): Promise<void> {
     // 1. Verify existence
     const { data: existing, error: findError } = await this.supabase
-      .from('portfolio_assets')
-      .select('id')
-      .eq('id', assetId)
-      .eq('user_id', userId)
+      .from("portfolio_assets")
+      .select("id")
+      .eq("id", assetId)
+      .eq("user_id", userId)
       .maybeSingle();
-      
+
     if (findError) throw new DatabaseError(findError.message);
-    if (!existing) throw new NotFoundError('Asset not found');
+    if (!existing) throw new NotFoundError("Asset not found");
 
     // 2. Delete
     const { error: deleteError } = await this.supabase
-      .from('portfolio_assets')
+      .from("portfolio_assets")
       .delete()
-      .eq('id', assetId)
-      .eq('user_id', userId);
+      .eq("id", assetId)
+      .eq("user_id", userId);
 
     if (deleteError) throw new DatabaseError(deleteError.message);
   }
@@ -339,4 +347,3 @@ export class PortfolioService {
 export function createPortfolioService(supabase: SupabaseClient<Database>): PortfolioService {
   return new PortfolioService(supabase);
 }
-

@@ -1,22 +1,19 @@
-import YahooFinance from 'yahoo-finance2';
+import YahooFinance from "yahoo-finance2";
 const yahooFinance = new YahooFinance({
   fetch: async (url, init) => {
     const headers = new Headers(init?.headers);
     // Emulate a browser to avoid 429 rate limiting
-    headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    headers.set(
+      "User-Agent",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    );
     return fetch(url, { ...init, headers });
   },
-  suppressNotices: ['yahooSurvey']
+  suppressNotices: ["yahooSurvey"],
 });
 
-import type { 
-  AssetPriceDTO, 
-  ExchangeRateDTO, 
-  MarketDataStatusDTO,
-  Currency,
-  CandleData
-} from '@/types';
-import { NotFoundError, ErrorCode, createErrorResponse } from '@/lib/utils/error.utils';
+import type { AssetPriceDTO, ExchangeRateDTO, MarketDataStatusDTO, Currency, CandleData } from "@/types";
+import { NotFoundError } from "@/lib/utils/error.utils";
 
 // Cache interface
 interface CacheEntry<T> {
@@ -61,10 +58,10 @@ export class MarketDataService {
   public async getPrice(ticker: string): Promise<AssetPriceDTO> {
     const normalizedTicker = ticker.toUpperCase();
     const now = Date.now();
-    
+
     // Check cache
     const cachedEntry = this.cache.prices.get(normalizedTicker);
-    if (cachedEntry && (now - cachedEntry.timestamp < CACHE_TTL_MS)) {
+    if (cachedEntry && now - cachedEntry.timestamp < CACHE_TTL_MS) {
       return {
         ticker: normalizedTicker,
         price: cachedEntry.data.price,
@@ -76,56 +73,61 @@ export class MarketDataService {
 
     // Fetch from Yahoo Finance (Cache Miss)
     try {
-        const data = await this.fetchPrice(normalizedTicker);
-        
-        // Update cache
-        this.cache.prices.set(normalizedTicker, {
-          data,
-          timestamp: now,
-        });
+      const data = await this.fetchPrice(normalizedTicker);
 
+      // Update cache
+      this.cache.prices.set(normalizedTicker, {
+        data,
+        timestamp: now,
+      });
+
+      return {
+        ticker: normalizedTicker,
+        price: data.price,
+        currency: data.currency,
+        timestamp: new Date(now).toISOString(),
+        cached: false,
+      };
+    } catch (e) {
+      console.error(`Failed to fetch price for ${normalizedTicker}:`, e);
+      // Fallback for demo purposes if API fails or rate limited
+      // In prod we might want to rethrow or return stored stale data
+      if (cachedEntry) {
         return {
           ticker: normalizedTicker,
-          price: data.price,
-          currency: data.currency,
-          timestamp: new Date(now).toISOString(),
-          cached: false,
+          price: cachedEntry.data.price,
+          currency: cachedEntry.data.currency,
+          timestamp: new Date(cachedEntry.timestamp).toISOString(),
+          cached: true,
         };
-    } catch (e) {
-        console.error(`Failed to fetch price for ${normalizedTicker}:`, e);
-        // Fallback for demo purposes if API fails or rate limited
-        // In prod we might want to rethrow or return stored stale data
-        if (cachedEntry) {
-             return {
-                ticker: normalizedTicker,
-                price: cachedEntry.data.price,
-                currency: cachedEntry.data.currency,
-                timestamp: new Date(cachedEntry.timestamp).toISOString(),
-                cached: true,
-             };
-        }
-        throw e;
+      }
+      throw e;
     }
   }
 
   /**
    * Get historical candle data for an asset
    */
-  public async getCandles(ticker: string, range: string = '1y'): Promise<CandleData[]> {
+  public async getCandles(
+    ticker: string, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _range = "1y"
+  ): Promise<CandleData[]> {
     try {
+      // range is currently unused but kept for interface compatibility
+      // We might use it to calculate period1 based on different ranges (1d, 1w, 1m, etc.)
       const normalizedTicker = ticker.toUpperCase();
       const period1 = new Date();
       period1.setFullYear(period1.getFullYear() - 1); // Default to 1 year ago
       const period2 = new Date(); // Now
 
       const result = await yahooFinance.historical(normalizedTicker, {
-        period1: period1.toISOString().split('T')[0], // yyyy-mm-dd
-        period2: period2.toISOString().split('T')[0], // yyyy-mm-dd
-        interval: '1d',
+        period1: period1.toISOString().split("T")[0], // yyyy-mm-dd
+        period2: period2.toISOString().split("T")[0], // yyyy-mm-dd
+        interval: "1d",
       });
 
-      return result.map((item: any) => ({
-        time: item.date.toISOString().split('T')[0], // yyyy-mm-dd
+      return result.map((item: { date: Date; open: number; high: number; low: number; close: number }) => ({
+        time: item.date.toISOString().split("T")[0], // yyyy-mm-dd
         open: item.open,
         high: item.high,
         low: item.low,
@@ -140,23 +142,23 @@ export class MarketDataService {
   /**
    * Get exchange rate between two currencies
    */
-  public async getExchangeRate(from: Currency = 'USD', to: Currency = 'PLN'): Promise<ExchangeRateDTO> {
+  public async getExchangeRate(from: Currency = "USD", to: Currency = "PLN"): Promise<ExchangeRateDTO> {
     if (from === to) {
-        return {
-            from,
-            to,
-            rate: 1,
-            timestamp: new Date().toISOString(),
-            cached: true
-        };
+      return {
+        from,
+        to,
+        rate: 1,
+        timestamp: new Date().toISOString(),
+        cached: true,
+      };
     }
 
     const key = `${from}-${to}`;
     const now = Date.now();
-    
+
     // Check cache
     const cachedEntry = this.cache.exchangeRates.get(key);
-    if (cachedEntry && (now - cachedEntry.timestamp < CACHE_TTL_MS)) {
+    if (cachedEntry && now - cachedEntry.timestamp < CACHE_TTL_MS) {
       return {
         from,
         to,
@@ -194,7 +196,7 @@ export class MarketDataService {
     const nextRefresh = new Date(now + CACHE_TTL_MS).toISOString();
 
     return {
-      status: 'operational',
+      status: "operational",
       last_updated: new Date(now).toISOString(),
       cache_ttl_seconds: CACHE_TTL_MS / 1000,
       next_refresh: nextRefresh,
@@ -206,17 +208,21 @@ export class MarketDataService {
   private async fetchPrice(ticker: string): Promise<{ price: number; currency: Currency }> {
     try {
       // Use the imported singleton instance
-      const quote = await yahooFinance.quote(ticker) as any;
-      
-      if (!quote || typeof quote.regularMarketPrice !== 'number') {
-         throw new NotFoundError(`Asset ${ticker}`);
+      const quote = (await yahooFinance.quote(ticker)) as unknown as {
+        regularMarketPrice: number;
+        currency?: string;
+      };
+
+      if (!quote || typeof quote.regularMarketPrice !== "number") {
+        throw new NotFoundError(`Asset ${ticker}`);
       }
-      
-      const currency = (quote.currency || 'USD').toUpperCase();
-      
+
+      const currency = (quote.currency || "USD").toUpperCase();
+
       return { price: quote.regularMarketPrice, currency };
-    } catch (error: any) {
-      if (error.message?.includes('Not Found') || error.name === 'NotFoundError') {
+    } catch (error: unknown) {
+      const err = error as Error | { message?: string; name?: string };
+      if (err.message?.includes("Not Found") || err.name === "NotFoundError") {
         throw new NotFoundError(`Asset ${ticker}`);
       }
       console.error(`Error fetching price for ${ticker}:`, error);
@@ -227,20 +233,20 @@ export class MarketDataService {
   private async fetchExchangeRate(from: Currency, to: Currency): Promise<number> {
     try {
       const response = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
-      
+
       if (!response.ok) {
         throw new Error(`Exchange rate API error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
-      if (!data || !data.rates || typeof data.rates[to] !== 'number') {
-        throw new Error('Invalid exchange rate data format');
+
+      if (!data || !data.rates || typeof data.rates[to] !== "number") {
+        throw new Error("Invalid exchange rate data format");
       }
 
       return data.rates[to];
     } catch (error) {
-      console.error('Error fetching exchange rate:', error);
+      console.error("Error fetching exchange rate:", error);
       throw error;
     }
   }

@@ -1,7 +1,7 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { SectorDTO, SectorsListDTO, CreateSectorCommand, UpdateSectorCommand } from '../../types';
-import { ValidationError, NotFoundError, DatabaseError } from '../utils/error.utils';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
+import type { SectorDTO, SectorsListDTO, CreateSectorCommand, UpdateSectorCommand } from "../../types";
+import { ValidationError, NotFoundError, DatabaseError } from "../utils/error.utils";
 
 /**
  * Sector Service - handles sector-related database operations
@@ -14,14 +14,14 @@ export class SectorService {
    */
   async listSectors(userId: string): Promise<SectorsListDTO> {
     if (!userId) {
-      throw new ValidationError('User ID is required', 'user_id');
+      throw new ValidationError("User ID is required", "user_id");
     }
 
     const { data, error, count } = await this.supabase
-      .from('sectors')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('name', { ascending: true });
+      .from("sectors")
+      .select("*", { count: "exact" })
+      .eq("user_id", userId)
+      .order("name", { ascending: true });
 
     if (error) {
       throw new DatabaseError(error.message);
@@ -41,29 +41,29 @@ export class SectorService {
    */
   async createSector(userId: string, command: CreateSectorCommand): Promise<SectorDTO> {
     if (!userId) {
-      throw new ValidationError('User ID is required', 'user_id');
+      throw new ValidationError("User ID is required", "user_id");
     }
 
     // 1. Check max sectors limit
     const { count, error: countError } = await this.supabase
-      .from('sectors')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .from("sectors")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
 
     if (countError) {
       throw new DatabaseError(countError.message);
     }
 
     if (count !== null && count >= 32) {
-      throw new ValidationError('Maximum limit of 32 sectors reached', 'name');
+      throw new ValidationError("Maximum limit of 32 sectors reached", "name");
     }
 
     // 2. Check name uniqueness
     const { data: existing, error: distinctError } = await this.supabase
-      .from('sectors')
-      .select('id')
-      .eq('user_id', userId)
-      .ilike('name', command.name) // Case insensitive check
+      .from("sectors")
+      .select("id")
+      .eq("user_id", userId)
+      .ilike("name", command.name) // Case insensitive check
       .maybeSingle();
 
     if (distinctError) {
@@ -71,12 +71,12 @@ export class SectorService {
     }
 
     if (existing) {
-      throw new ValidationError(`Sector with name "${command.name}" already exists`, 'name');
+      throw new ValidationError(`Sector with name "${command.name}" already exists`, "name");
     }
 
     // 3. Create sector
     const { data, error } = await this.supabase
-      .from('sectors')
+      .from("sectors")
       .insert({
         user_id: userId,
         name: command.name,
@@ -97,43 +97,43 @@ export class SectorService {
    * - Name must be unique (excluding current sector)
    */
   async updateSector(userId: string, sectorId: string, command: UpdateSectorCommand): Promise<SectorDTO> {
-    if (!userId) throw new ValidationError('User ID is required', 'user_id');
-    if (!sectorId) throw new ValidationError('Sector ID is required', 'id');
+    if (!userId) throw new ValidationError("User ID is required", "user_id");
+    if (!sectorId) throw new ValidationError("Sector ID is required", "id");
 
     // 1. Check if sector exists
     const { data: current, error: findError } = await this.supabase
-      .from('sectors')
-      .select('id')
-      .eq('id', sectorId)
-      .eq('user_id', userId)
+      .from("sectors")
+      .select("id")
+      .eq("id", sectorId)
+      .eq("user_id", userId)
       .maybeSingle();
-      
+
     if (findError) throw new DatabaseError(findError.message);
-    if (!current) throw new NotFoundError('Sector');
+    if (!current) throw new NotFoundError("Sector");
 
     // 2. Check name uniqueness (excluding current sector)
     const { data: duplicate, error: distinctError } = await this.supabase
-      .from('sectors')
-      .select('id')
-      .eq('user_id', userId)
-      .ilike('name', command.name)
-      .neq('id', sectorId)
+      .from("sectors")
+      .select("id")
+      .eq("user_id", userId)
+      .ilike("name", command.name)
+      .neq("id", sectorId)
       .maybeSingle();
 
     if (distinctError) throw new DatabaseError(distinctError.message);
-    
+
     if (duplicate) {
-      throw new ValidationError(`Sector with name "${command.name}" already exists`, 'name');
+      throw new ValidationError(`Sector with name "${command.name}" already exists`, "name");
     }
 
     // 3. Update sector
     const { data, error } = await this.supabase
-      .from('sectors')
+      .from("sectors")
       .update({
         name: command.name,
       })
-      .eq('id', sectorId)
-      .eq('user_id', userId)
+      .eq("id", sectorId)
+      .eq("user_id", userId)
       .select()
       .single();
 
@@ -148,26 +148,22 @@ export class SectorService {
    * Deletes a sector
    */
   async deleteSector(userId: string, sectorId: string): Promise<void> {
-    if (!userId) throw new ValidationError('User ID is required', 'user_id');
-    if (!sectorId) throw new ValidationError('Sector ID is required', 'id');
+    if (!userId) throw new ValidationError("User ID is required", "user_id");
+    if (!sectorId) throw new ValidationError("Sector ID is required", "id");
 
     // 1. Check if sector exists
-     const { data: current, error: findError } = await this.supabase
-      .from('sectors')
-      .select('id')
-      .eq('id', sectorId)
-      .eq('user_id', userId)
+    const { data: current, error: findError } = await this.supabase
+      .from("sectors")
+      .select("id")
+      .eq("id", sectorId)
+      .eq("user_id", userId)
       .maybeSingle();
-      
+
     if (findError) throw new DatabaseError(findError.message);
-    if (!current) throw new NotFoundError('Sector');
+    if (!current) throw new NotFoundError("Sector");
 
     // 2. Delete sector
-    const { error } = await this.supabase
-      .from('sectors')
-      .delete()
-      .eq('id', sectorId)
-      .eq('user_id', userId);
+    const { error } = await this.supabase.from("sectors").delete().eq("id", sectorId).eq("user_id", userId);
 
     if (error) {
       throw new DatabaseError(error.message);
@@ -181,4 +177,3 @@ export class SectorService {
 export function createSectorService(supabase: SupabaseClient<Database>): SectorService {
   return new SectorService(supabase);
 }
-

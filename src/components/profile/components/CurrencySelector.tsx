@@ -1,12 +1,6 @@
-import * as React from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select"
-import type { Currency } from "@/types"
+import * as React from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+import type { Currency } from "@/types";
 
 interface CurrencySelectorProps {
   value: Currency;
@@ -25,6 +19,5 @@ export function CurrencySelector({ value, disabled, onChange }: CurrencySelector
         <SelectItem value="PLN">PLN </SelectItem>
       </SelectContent>
     </Select>
-  )
+  );
 }
-

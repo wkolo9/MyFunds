@@ -30,10 +30,10 @@ export function UserSettingsCard({ profile, isLoading, onCurrencyChange }: UserS
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-            <Label>Identyfikator użytkownika</Label>
-            <div className="text-sm font-mono text-muted-foreground p-2 bg-muted rounded-md break-all">
-                {isLoading ? "Ładowanie..." : profile?.user_id}
-            </div>
+          <Label>Identyfikator użytkownika</Label>
+          <div className="text-sm font-mono text-muted-foreground p-2 bg-muted rounded-md break-all">
+            {isLoading ? "Ładowanie..." : profile?.user_id}
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Preferowana waluta</Label>
@@ -47,4 +47,3 @@ export function UserSettingsCard({ profile, isLoading, onCurrencyChange }: UserS
     </Card>
   );
 }
-

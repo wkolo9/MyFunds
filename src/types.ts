@@ -1,11 +1,11 @@
 /**
  * MyFunds MVP - Type Definitions
- * 
+ *
  * This file contains:
  * - Database Entity types (inferred from database schema)
  * - DTO (Data Transfer Object) types for API responses
  * - Command Model types for API requests
- * 
+ *
  * All DTOs are derived from and connected to database entities.
  */
 
@@ -86,7 +86,7 @@ export type ProfileDTO = ProfileEntity;
  * Only preferred_currency can be updated
  */
 export interface UpdateProfileCommand {
-  preferred_currency: Currency
+  preferred_currency: Currency;
 }
 
 // ============================================================================
@@ -287,7 +287,7 @@ export interface ExchangeRateDTO {
  * Market Data Status DTO - returned by GET /api/market/status
  */
 export interface MarketDataStatusDTO {
-  status: 'operational' | 'degraded' | 'down';
+  status: "operational" | "degraded" | "down";
   last_updated: string; // ISO 8601 timestamp
   cache_ttl_seconds: number; // Time to live for cached data
   next_refresh: string; // ISO 8601 timestamp
@@ -324,5 +324,5 @@ export interface CurrencyQueryParams {
  * Filter parameters for portfolio queries
  */
 export interface PortfolioFilterParams extends CurrencyQueryParams {
-  sector_id?: string | 'null'; // 'null' string to filter for unassigned assets
+  sector_id?: string | "null"; // 'null' string to filter for unassigned assets
 }
