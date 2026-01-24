@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../ui/alert-dialog"
+} from "../../ui/alert-dialog";
 
 interface DeleteSectorDialogProps {
   open: boolean;
@@ -23,8 +23,8 @@ export function DeleteSectorDialog({ open, sectorName, onConfirm, onCancel }: De
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the sector <strong>{sectorName}</strong>.
-            Assets currently assigned to this sector will be moved to "Other".
+            This will permanently delete the sector <strong>{sectorName}</strong>. Assets currently assigned to this
+            sector will be moved to &quot;Other&quot;.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -35,6 +35,5 @@ export function DeleteSectorDialog({ open, sectorName, onConfirm, onCancel }: De
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
-

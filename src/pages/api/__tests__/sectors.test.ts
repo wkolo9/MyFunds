@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { GET, POST } from '../sectors/index';
-import { PATCH, DELETE } from '../sectors/[id]';
-import { ErrorCode } from '@/lib/utils/error.utils';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { GET, POST } from "../sectors/index";
+import { PATCH, DELETE } from "../sectors/[id]";
+import { ErrorCode } from "@/lib/utils/error.utils";
 
 // Mocks
-vi.mock('@/lib/services/sector.service', () => ({
+vi.mock("@/lib/services/sector.service", () => ({
   createSectorService: vi.fn(() => ({
     listSectors: vi.fn(),
     createSector: vi.fn(),
@@ -15,15 +15,15 @@ vi.mock('@/lib/services/sector.service', () => ({
 }));
 
 // Mock auth utils
-vi.mock('@/lib/utils/auth.utils', () => ({
+vi.mock("@/lib/utils/auth.utils", () => ({
   getAuthenticatedUser: vi.fn(),
 }));
 
-import { createSectorService } from '@/lib/services/sector.service';
-import { getAuthenticatedUser } from '@/lib/utils/auth.utils';
+import { createSectorService } from "@/lib/services/sector.service";
+import { getAuthenticatedUser } from "@/lib/utils/auth.utils";
 
-describe('Sectors API', () => {
-  const mockUser = { id: 'user-123', email: 'test@example.com' };
+describe("Sectors API", () => {
+  const mockUser = { id: "user-123", email: "test@example.com" };
   const mockContext = {
     request: {
       headers: new Map(),
@@ -39,18 +39,18 @@ describe('Sectors API', () => {
     vi.clearAllMocks();
   });
 
-  describe('GET /api/sectors', () => {
-    it('should return 401 if not authenticated', async () => {
+  describe("GET /api/sectors", () => {
+    it("should return 401 if not authenticated", async () => {
       (getAuthenticatedUser as any).mockResolvedValue(null);
-      
+
       const response = await GET(mockContext);
       const data = await response.json();
-      
+
       expect(response.status).toBe(401);
       expect(data.error.code).toBe(ErrorCode.INVALID_TOKEN);
     });
 
-    it('should return sectors list', async () => {
+    it("should return sectors list", async () => {
       (getAuthenticatedUser as any).mockResolvedValue(mockUser);
       const mockSectors = { sectors: [], total: 0 };
       const mockService = { listSectors: vi.fn().mockResolvedValue(mockSectors) };
@@ -65,10 +65,10 @@ describe('Sectors API', () => {
     });
   });
 
-  describe('POST /api/sectors', () => {
-    it('should return 400 for invalid body', async () => {
+  describe("POST /api/sectors", () => {
+    it("should return 400 for invalid body", async () => {
       (getAuthenticatedUser as any).mockResolvedValue(mockUser);
-      mockContext.request.json.mockResolvedValue({ name: '' }); // Empty name
+      mockContext.request.json.mockResolvedValue({ name: "" }); // Empty name
 
       const response = await POST(mockContext);
       const data = await response.json();
@@ -77,12 +77,12 @@ describe('Sectors API', () => {
       expect(data.error.code).toBe(ErrorCode.VALIDATION_ERROR);
     });
 
-    it('should create sector', async () => {
+    it("should create sector", async () => {
       (getAuthenticatedUser as any).mockResolvedValue(mockUser);
-      const payload = { name: 'Tech' };
+      const payload = { name: "Tech" };
       mockContext.request.json.mockResolvedValue(payload);
-      
-      const mockSector = { id: '1', ...payload };
+
+      const mockSector = { id: "1", ...payload };
       const mockService = { createSector: vi.fn().mockResolvedValue(mockSector) };
       (createSectorService as any).mockReturnValue(mockService);
 
@@ -95,19 +95,19 @@ describe('Sectors API', () => {
     });
   });
 
-  describe('PATCH /api/sectors/[id]', () => {
-    const validUuid = '123e4567-e89b-12d3-a456-426614174000';
-    
-    it('should return 400 for invalid UUID', async () => {
-        const context = { ...mockContext, params: { id: 'invalid-id' } };
-        const response = await PATCH(context);
-        expect(response.status).toBe(400);
+  describe("PATCH /api/sectors/[id]", () => {
+    const validUuid = "123e4567-e89b-12d3-a456-426614174000";
+
+    it("should return 400 for invalid UUID", async () => {
+      const context = { ...mockContext, params: { id: "invalid-id" } };
+      const response = await PATCH(context);
+      expect(response.status).toBe(400);
     });
 
-    it('should update sector', async () => {
+    it("should update sector", async () => {
       (getAuthenticatedUser as any).mockResolvedValue(mockUser);
       const context = { ...mockContext, params: { id: validUuid } };
-      const payload = { name: 'New Name' };
+      const payload = { name: "New Name" };
       context.request.json.mockResolvedValue(payload);
 
       const mockSector = { id: validUuid, ...payload };
@@ -122,13 +122,13 @@ describe('Sectors API', () => {
     });
   });
 
-    describe('DELETE /api/sectors/[id]', () => {
-    const validUuid = '123e4567-e89b-12d3-a456-426614174000';
+  describe("DELETE /api/sectors/[id]", () => {
+    const validUuid = "123e4567-e89b-12d3-a456-426614174000";
 
-    it('should delete sector', async () => {
+    it("should delete sector", async () => {
       (getAuthenticatedUser as any).mockResolvedValue(mockUser);
       const context = { ...mockContext, params: { id: validUuid } };
-      
+
       const mockService = { deleteSector: vi.fn().mockResolvedValue(undefined) };
       (createSectorService as any).mockReturnValue(mockService);
 
@@ -139,4 +139,3 @@ describe('Sectors API', () => {
     });
   });
 });
-

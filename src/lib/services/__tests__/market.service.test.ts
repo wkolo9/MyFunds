@@ -1,39 +1,40 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MarketDataService } from '../market.service';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { MarketDataService } from "../market.service";
 
 const mocks = vi.hoisted(() => ({
   quote: vi.fn(),
 }));
 
 // Mock yahoo-finance2
-vi.mock('yahoo-finance2', () => {
+vi.mock("yahoo-finance2", () => {
   return {
     default: class {
       quote = mocks.quote;
-    }
+    },
   };
 });
 
 // Mock fetch
 global.fetch = vi.fn();
 
-describe('MarketDataService', () => {
+describe("MarketDataService", () => {
   let service: MarketDataService;
 
   beforeEach(() => {
     // Clear mocks
     vi.clearAllMocks();
     service = MarketDataService.getInstance();
-    
+
     // Hack to clear cache for testing purposes
     (service as any).cache.prices.clear();
     (service as any).cache.exchangeRate = null;
   });
 
-  describe('getPrice', () => {
-    it('should fetch price from yahoo-finance2 and return AssetPriceDTO', async () => {
-      const mockTicker = 'AAPL';
-      const mockPrice = 150.50;
+  describe("getPrice", () => {
+    it("should fetch price from yahoo-finance2 and return AssetPriceDTO", async () => {
+      const mockTicker = "AAPL";
+      const mockPrice = 150.5;
 
       mocks.quote.mockResolvedValue({
         regularMarketPrice: mockPrice,
@@ -45,15 +46,15 @@ describe('MarketDataService', () => {
       expect(result).toEqual({
         ticker: mockTicker,
         price: mockPrice,
-        currency: 'USD',
+        currency: "USD",
         timestamp: expect.any(String),
         cached: false,
       });
     });
 
-    it('should return cached price on second call', async () => {
-      const mockTicker = 'GOOGL';
-      const mockPrice = 2800.00;
+    it("should return cached price on second call", async () => {
+      const mockTicker = "GOOGL";
+      const mockPrice = 2800.0;
 
       mocks.quote.mockResolvedValue({
         regularMarketPrice: mockPrice,
@@ -61,7 +62,7 @@ describe('MarketDataService', () => {
 
       // First call - cache miss
       await service.getPrice(mockTicker);
-      
+
       // Second call - cache hit
       const result = await service.getPrice(mockTicker);
 
@@ -70,19 +71,19 @@ describe('MarketDataService', () => {
       expect(result.price).toBe(mockPrice);
     });
 
-    it('should throw NotFoundError if yahoo-finance2 throws error', async () => {
-      const mockTicker = 'INVALID';
-      
-      mocks.quote.mockRejectedValue(new Error('Not Found'));
+    it("should throw NotFoundError if yahoo-finance2 throws error", async () => {
+      const mockTicker = "INVALID";
 
-      await expect(service.getPrice(mockTicker)).rejects.toThrow('Asset INVALID not found');
+      mocks.quote.mockRejectedValue(new Error("Not Found"));
+
+      await expect(service.getPrice(mockTicker)).rejects.toThrow("Asset INVALID not found");
     });
   });
 
-  describe('getExchangeRate', () => {
-    it('should fetch exchange rate from Frankfurter API', async () => {
+  describe("getExchangeRate", () => {
+    it("should fetch exchange rate from Frankfurter API", async () => {
       const mockRate = 4.25;
-      
+
       (global.fetch as any).mockResolvedValue({
         ok: true,
         json: async () => ({ rates: { PLN: mockRate } }),
@@ -90,19 +91,19 @@ describe('MarketDataService', () => {
 
       const result = await service.getExchangeRate();
 
-      expect(global.fetch).toHaveBeenCalledWith('https://api.frankfurter.app/latest?from=USD&to=PLN');
+      expect(global.fetch).toHaveBeenCalledWith("https://api.frankfurter.app/latest?from=USD&to=PLN");
       expect(result).toEqual({
-        from: 'USD',
-        to: 'PLN',
+        from: "USD",
+        to: "PLN",
         rate: mockRate,
         timestamp: expect.any(String),
         cached: false,
       });
     });
 
-    it('should return cached rate on second call', async () => {
+    it("should return cached rate on second call", async () => {
       const mockRate = 4.25;
-      
+
       (global.fetch as any).mockResolvedValue({
         ok: true,
         json: async () => ({ rates: { PLN: mockRate } }),
@@ -110,7 +111,7 @@ describe('MarketDataService', () => {
 
       // First call
       await service.getExchangeRate();
-      
+
       // Second call
       const result = await service.getExchangeRate();
 
@@ -120,12 +121,12 @@ describe('MarketDataService', () => {
     });
   });
 
-  describe('getStatus', () => {
-    it('should return service status', () => {
+  describe("getStatus", () => {
+    it("should return service status", () => {
       const result = service.getStatus();
-      
+
       expect(result).toMatchObject({
-        status: 'operational',
+        status: "operational",
         last_updated: expect.any(String),
         next_refresh: expect.any(String),
       });

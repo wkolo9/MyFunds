@@ -1,7 +1,7 @@
-import React from 'react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import type { SectorBreakdownDTO, Currency } from '../../../types';
+import React from "react";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import type { SectorBreakdownDTO, Currency } from "../../../types";
 
 interface SectorAllocationChartProps {
   data: SectorBreakdownDTO[];
@@ -9,22 +9,22 @@ interface SectorAllocationChartProps {
 }
 
 const COLORS = [
-  'var(--chart-1)',
-  'var(--chart-2)',
-  'var(--chart-3)',
-  'var(--chart-4)',
-  'var(--chart-5)',
-  '#8884d8', // Fallback for > 5 sectors
-  '#82ca9d',
-  '#ffc658',
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "#8884d8", // Fallback for > 5 sectors
+  "#82ca9d",
+  "#ffc658",
 ];
 
 export function SectorAllocationChart({ data, currency }: SectorAllocationChartProps) {
   const formatValue = (value: number) => {
-    return new Intl.NumberFormat(currency === 'USD' ? 'en-US' : 'pl-PL', {
-      style: 'currency',
+    return new Intl.NumberFormat(currency === "USD" ? "en-US" : "pl-PL", {
+      style: "currency",
       currency: currency,
-      currencyDisplay: 'code'
+      currencyDisplay: "code",
     }).format(value);
   };
 
@@ -43,16 +43,16 @@ export function SectorAllocationChart({ data, currency }: SectorAllocationChartP
   };
 
   if (!data || data.length === 0) {
-     return (
-        <Card className="h-full">
-            <CardHeader>
-                <CardTitle>Sector Allocation</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
-            </CardContent>
-        </Card>
-     )
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Sector Allocation</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center text-muted-foreground">
+          No data available
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -65,7 +65,7 @@ export function SectorAllocationChart({ data, currency }: SectorAllocationChartP
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data.map(item => ({ ...item, value: Number(item.value) }))}
+                data={data.map((item) => ({ ...item, value: Number(item.value) }))}
                 dataKey="value"
                 nameKey="sector_name"
                 cx="50%"
@@ -75,7 +75,12 @@ export function SectorAllocationChart({ data, currency }: SectorAllocationChartP
                 paddingAngle={2}
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--background)" strokeWidth={2} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                    stroke="var(--background)"
+                    strokeWidth={2}
+                  />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
@@ -87,4 +92,3 @@ export function SectorAllocationChart({ data, currency }: SectorAllocationChartP
     </Card>
   );
 }
-

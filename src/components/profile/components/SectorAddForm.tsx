@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Plus } from "lucide-react"
-import { Button } from "../../ui/button"
-import { Input } from "../../ui/input"
-import { Label } from "../../ui/label"
+import * as React from "react";
+import { Plus } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 
 interface SectorAddFormProps {
   isSubmitting: boolean;
@@ -11,28 +11,28 @@ interface SectorAddFormProps {
 }
 
 export function SectorAddForm({ isSubmitting, existingNames, onSubmit }: SectorAddFormProps) {
-  const [name, setName] = React.useState("")
-  const [error, setError] = React.useState<string | null>(null)
+  const [name, setName] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const trimmedName = name.trim()
-    
+    e.preventDefault();
+
+    const trimmedName = name.trim();
+
     if (!trimmedName) {
-      setError("Name cannot be empty")
-      return
+      setError("Name cannot be empty");
+      return;
     }
 
-    if (existingNames.some(n => n.toLowerCase() === trimmedName.toLowerCase())) {
-      setError("Sector with this name already exists")
-      return
+    if (existingNames.some((n) => n.toLowerCase() === trimmedName.toLowerCase())) {
+      setError("Sector with this name already exists");
+      return;
     }
 
-    setError(null)
-    onSubmit(trimmedName)
-    setName("")
-  }
+    setError(null);
+    onSubmit(trimmedName);
+    setName("");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
@@ -44,8 +44,8 @@ export function SectorAddForm({ isSubmitting, existingNames, onSubmit }: SectorA
             placeholder="Sector name"
             value={name}
             onChange={(e) => {
-              setName(e.target.value)
-              if (error) setError(null)
+              setName(e.target.value);
+              if (error) setError(null);
             }}
             disabled={isSubmitting}
             className={error ? "border-red-500" : ""}
@@ -58,6 +58,5 @@ export function SectorAddForm({ isSubmitting, existingNames, onSubmit }: SectorA
         </Button>
       </div>
     </form>
-  )
+  );
 }
-

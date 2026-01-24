@@ -56,11 +56,19 @@ const reactConfig = tseslint.config({
   },
 });
 
+const overridesConfig = tseslint.config({
+  files: ["e2e/**/*.ts", "src/pages/api/**/*.ts"],
+  rules: {
+    "no-console": "off",
+  },
+});
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
-  eslintPluginPrettier
+  eslintPluginPrettier,
+  overridesConfig
 );

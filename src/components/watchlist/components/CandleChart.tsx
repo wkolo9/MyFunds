@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, type IChartApi, CandlestickSeries } from 'lightweight-charts';
-import { getCandles } from '@/lib/commands/get-candles';
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { createChart, ColorType, type IChartApi, CandlestickSeries } from "lightweight-charts";
+import { getCandles } from "@/lib/commands/get-candles";
 
 interface CandleChartProps {
   ticker: string;
@@ -13,41 +13,50 @@ interface CandleChartProps {
   };
 }
 
-export const CandleChart: React.FC<CandleChartProps> = ({ 
-  ticker, 
-  height = 300,
-  colors = {
-    up: '#22c55e', // green-500
-    down: '#ef4444', // red-500
-    background: 'transparent',
-    text: '#9ca3af', // gray-400
-  }
-}) => {
+const DEFAULT_COLORS = {
+  up: "#22c55e", // green-500
+  down: "#ef4444", // red-500
+  background: "transparent",
+  text: "#9ca3af", // gray-400
+};
+
+export const CandleChart: React.FC<CandleChartProps> = ({ ticker, height = 300, colors = DEFAULT_COLORS }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<boolean>(false);
+
+  // Memoize colors to prevent unnecessary re-renders
+  const memoizedColors = useMemo(
+    () => ({
+      up: colors.up,
+      down: colors.down,
+      background: colors.background,
+      text: colors.text,
+    }),
+    [colors.up, colors.down, colors.background, colors.text]
+  );
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
     let mounted = true;
-    
+
     // 1. Initialize Chart
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: colors.background },
-        textColor: colors.text,
+        background: { type: ColorType.Solid, color: memoizedColors.background },
+        textColor: memoizedColors.text,
       },
       width: chartContainerRef.current.clientWidth,
       height: height,
       localization: {
-        locale: 'en-US',
+        locale: "en-US",
       },
       grid: {
         vertLines: { visible: false },
-        horzLines: { color: '#334155' }, // slate-700
+        horzLines: { color: "#334155" }, // slate-700
       },
       rightPriceScale: {
         borderVisible: false,
@@ -64,11 +73,11 @@ export const CandleChart: React.FC<CandleChartProps> = ({
 
     // 2. Add Series (v5 syntax)
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: colors.up,
-      downColor: colors.down,
+      upColor: memoizedColors.up,
+      downColor: memoizedColors.down,
       borderVisible: false,
-      wickUpColor: colors.up,
-      wickDownColor: colors.down,
+      wickUpColor: memoizedColors.up,
+      wickDownColor: memoizedColors.down,
     });
 
     chartRef.current = chart;
@@ -76,9 +85,9 @@ export const CandleChart: React.FC<CandleChartProps> = ({
     // 3. Setup Resizing
     const handleResize = () => {
       if (chartContainerRef.current) {
-        chart.applyOptions({ 
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight,
         });
       }
     };
@@ -91,15 +100,13 @@ export const CandleChart: React.FC<CandleChartProps> = ({
       try {
         setLoading(true);
         setError(false);
-        
+
         const chartData = await getCandles(ticker);
-        
+
         if (!mounted) return;
-console.log(chartData);
         series.setData(chartData);
         chart.timeScale().fitContent();
         setLoading(false);
-
       } catch (err) {
         console.error(`Failed to fetch candles for ${ticker}`, err);
         if (mounted) {
@@ -118,20 +125,20 @@ console.log(chartData);
       chart.remove();
       chartRef.current = null;
     };
-  }, []); 
+  }, [ticker, height, memoizedColors]);
 
   return (
     <div className="relative w-full h-full">
       {/* Chart is always rendered */}
       <div ref={chartContainerRef} className="w-full h-full" />
-      
+
       {/* Loading Overlay */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/50 backdrop-blur-[1px] z-10 pointer-events-none">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-t-transparent" />
         </div>
       )}
-      
+
       {/* Error Overlay */}
       {error && !loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-sm text-slate-500">

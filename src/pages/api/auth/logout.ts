@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
-import { createSupabaseServerInstance } from '../../../db/supabase.client';
+import type { APIRoute } from "astro";
+import { createSupabaseServerInstance } from "../../../db/supabase.client";
 
 export const POST: APIRoute = async ({ cookies, request, redirect }) => {
   const supabase = createSupabaseServerInstance({ cookies, headers: request.headers });
@@ -8,8 +8,8 @@ export const POST: APIRoute = async ({ cookies, request, redirect }) => {
 
   if (error) {
     // Even if error, we redirect to login
-    return redirect('/auth/login');
+    return redirect("/auth/login");
   }
 
-  return redirect('/auth/login');
+  return redirect("/auth/login");
 };

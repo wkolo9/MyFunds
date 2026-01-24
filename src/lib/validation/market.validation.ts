@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Market Data validation schemas
@@ -10,9 +10,9 @@ import { z } from 'zod';
  */
 export const tickerSchema = z
   .string()
-  .min(1, 'Ticker cannot be empty')
-  .max(10, 'Ticker cannot exceed 10 characters')
-  .regex(/^[A-Z0-9.\-^]+$/, 'Ticker must be alphanumeric')
+  .min(1, "Ticker cannot be empty")
+  .max(10, "Ticker cannot exceed 10 characters")
+  .regex(/^[A-Z0-9.\-^]+$/, "Ticker must be alphanumeric")
   .transform((val) => val.toUpperCase());
 
 /**
@@ -21,4 +21,3 @@ export const tickerSchema = z
 export const tickerParamSchema = z.object({
   ticker: tickerSchema,
 });
-

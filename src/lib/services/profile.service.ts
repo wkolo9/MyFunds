@@ -1,9 +1,9 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { ProfileEntity } from '../../types';
-import { ValidationError } from '../../lib/utils/error.utils';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
+import type { ProfileEntity } from "../../types";
+import { ValidationError } from "../../lib/utils/error.utils";
 
-import type { UpdateProfileCommand } from '../../types';
+import type { UpdateProfileCommand } from "../../types";
 
 /**
  * Profile Service - handles profile-related database operations
@@ -17,25 +17,21 @@ export class ProfileService {
    */
   async getProfile(userId: string): Promise<ProfileEntity> {
     // Example validation that would throw proper validation errors
-    if (!userId || typeof userId !== 'string') {
-      throw new ValidationError('User ID is required and must be a string', 'user_id');
+    if (!userId || typeof userId !== "string") {
+      throw new ValidationError("User ID is required and must be a string", "user_id");
     }
 
     if (userId.length !== 36) {
-      throw new ValidationError('User ID must be a valid UUID format', 'user_id');
+      throw new ValidationError("User ID must be a valid UUID format", "user_id");
     }
 
-    const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    const { data, error } = await this.supabase.from("profiles").select("*").eq("user_id", userId).single();
 
     if (error) {
       // Return mocked data instead of throwing for now
       return {
         user_id: userId,
-        preferred_currency: 'USD',
+        preferred_currency: "USD",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as ProfileEntity;
@@ -50,16 +46,16 @@ export class ProfileService {
    */
   async updateProfile(userId: string, command: UpdateProfileCommand): Promise<ProfileEntity> {
     if (!userId) {
-      throw new ValidationError('User ID is required', 'user_id');
+      throw new ValidationError("User ID is required", "user_id");
     }
 
     const { data, error } = await this.supabase
-      .from('profiles')
+      .from("profiles")
       .update({
         preferred_currency: command.preferred_currency,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', userId)
+      .eq("user_id", userId)
       .select()
       .single();
 

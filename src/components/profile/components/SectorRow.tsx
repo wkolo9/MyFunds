@@ -1,9 +1,9 @@
-import * as React from "react"
-import { Pencil, Trash2, Check, X } from "lucide-react"
-import { Button } from "../../ui/button"
-import { Input } from "../../ui/input"
-import { TableCell, TableRow } from "../../ui/table"
-import type { SectorDTO } from "@/types"
+import * as React from "react";
+import { Pencil, Trash2, Check, X } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { TableCell, TableRow } from "../../ui/table";
+import type { SectorDTO } from "@/types";
 
 interface SectorRowProps {
   sector: SectorDTO;
@@ -13,44 +13,44 @@ interface SectorRowProps {
 }
 
 export function SectorRow({ sector, existingNames, onSave, onDeleteRequest }: SectorRowProps) {
-  const [isEditing, setIsEditing] = React.useState(false)
-  const [tempName, setTempName] = React.useState(sector.name)
-  const [error, setError] = React.useState<string | null>(null)
-  const [isSaving, setIsSaving] = React.useState(false)
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [tempName, setTempName] = React.useState(sector.name);
+  const [error, setError] = React.useState<string | null>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   const handleSave = async () => {
-    const trimmedName = tempName.trim()
-    
+    const trimmedName = tempName.trim();
+
     if (!trimmedName) {
-      setError("Name cannot be empty")
-      return
+      setError("Name cannot be empty");
+      return;
     }
 
     if (
       trimmedName.toLowerCase() !== sector.name.toLowerCase() &&
-      existingNames.some(n => n.toLowerCase() === trimmedName.toLowerCase())
+      existingNames.some((n) => n.toLowerCase() === trimmedName.toLowerCase())
     ) {
-      setError("Sector with this name already exists")
-      return
+      setError("Sector with this name already exists");
+      return;
     }
 
     try {
-      setIsSaving(true)
-      await onSave(sector.id, trimmedName)
-      setIsEditing(false)
-      setError(null)
-    } catch (e) {
+      setIsSaving(true);
+      await onSave(sector.id, trimmedName);
+      setIsEditing(false);
+      setError(null);
+    } catch {
       // Error handling is done in parent, but we can catch here if needed
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsEditing(false)
-    setTempName(sector.name)
-    setError(null)
-  }
+    setIsEditing(false);
+    setTempName(sector.name);
+    setError(null);
+  };
 
   if (isEditing) {
     return (
@@ -61,15 +61,16 @@ export function SectorRow({ sector, existingNames, onSave, onDeleteRequest }: Se
               <Input
                 value={tempName}
                 onChange={(e) => {
-                  setTempName(e.target.value)
-                  if (error) setError(null)
+                  setTempName(e.target.value);
+                  if (error) setError(null);
                 }}
                 disabled={isSaving}
                 className={error ? "border-red-500" : ""}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSave()
-                  if (e.key === "Escape") handleCancel()
+                  if (e.key === "Enter") handleSave();
+                  if (e.key === "Escape") handleCancel();
                 }}
+                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
               {error && <p className="text-xs text-red-500">{error}</p>}
@@ -83,7 +84,7 @@ export function SectorRow({ sector, existingNames, onSave, onDeleteRequest }: Se
           </div>
         </TableCell>
       </TableRow>
-    )
+    );
   }
 
   return (
@@ -102,6 +103,5 @@ export function SectorRow({ sector, existingNames, onSave, onDeleteRequest }: Se
         </div>
       </TableCell>
     </TableRow>
-  )
+  );
 }
-
