@@ -1,7 +1,10 @@
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string
+  ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -24,4 +27,3 @@ export async function handleResponse<T>(response: Response): Promise<T> {
   }
   return response.json();
 }
-

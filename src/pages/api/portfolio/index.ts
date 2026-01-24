@@ -1,10 +1,10 @@
-import type { APIRoute } from 'astro';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/db/database.types';
-import { createPortfolioService } from '@/lib/services/portfolio.service';
-import { createErrorResponseObject, handleServiceError, ErrorCode } from '@/lib/utils/error.utils';
-import { createAssetSchema, querySchema } from '@/lib/validation/portfolio.validation';
-import { getAuthenticatedUser } from '@/lib/utils/auth.utils';
+import type { APIRoute } from "astro";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/db/database.types";
+import { createPortfolioService } from "@/lib/services/portfolio.service";
+import { createErrorResponseObject, handleServiceError, ErrorCode } from "@/lib/utils/error.utils";
+import { createAssetSchema, querySchema } from "@/lib/validation/portfolio.validation";
+import { getAuthenticatedUser } from "@/lib/utils/auth.utils";
 
 export const prerender = false;
 
@@ -16,26 +16,21 @@ export const GET: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, "Missing or invalid authentication", 401);
     }
     const userId = user.id;
 
     const url = new URL(context.request.url);
     const queryParams = {
-      currency: url.searchParams.get('currency') || undefined,
-      sector_id: url.searchParams.get('sector_id') || undefined,
+      currency: url.searchParams.get("currency") || undefined,
+      sector_id: url.searchParams.get("sector_id") || undefined,
     };
 
     // Validate query params
     const parseResult = querySchema.safeParse(queryParams);
     if (!parseResult.success) {
       const firstError = parseResult.error.errors[0];
-      return createErrorResponseObject(
-        ErrorCode.VALIDATION_ERROR, 
-        firstError.message, 
-        400, 
-        firstError.path.join('.')
-      );
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, firstError.message, 400, firstError.path.join("."));
     }
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
@@ -45,10 +40,10 @@ export const GET: APIRoute = async (context) => {
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('API Error in GET /api/portfolio:', error);
+    console.error("API Error in GET /api/portfolio:", error);
     return handleServiceError(error);
   }
 };
@@ -61,7 +56,7 @@ export const POST: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, "Missing or invalid authentication", 401);
     }
     const userId = user.id;
 
@@ -69,18 +64,13 @@ export const POST: APIRoute = async (context) => {
     try {
       body = await context.request.json();
     } catch (e) {
-      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, 'Invalid JSON body', 400);
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
     const parseResult = createAssetSchema.safeParse(body);
     if (!parseResult.success) {
       const firstError = parseResult.error.errors[0];
-      return createErrorResponseObject(
-        ErrorCode.VALIDATION_ERROR, 
-        firstError.message, 
-        400, 
-        firstError.path.join('.')
-      );
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, firstError.message, 400, firstError.path.join("."));
     }
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
@@ -89,10 +79,10 @@ export const POST: APIRoute = async (context) => {
 
     return new Response(JSON.stringify(newAsset), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-     console.error('API Error in POST /api/portfolio:', error);
+    console.error("API Error in POST /api/portfolio:", error);
     return handleServiceError(error);
   }
 };

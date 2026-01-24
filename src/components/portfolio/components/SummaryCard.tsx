@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Button } from '../../ui/button';
-import type { Currency } from '../../../types';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Button } from "../../ui/button";
+import type { Currency } from "../../../types";
 
 interface SummaryCardProps {
   totalValue: number;
@@ -10,15 +10,10 @@ interface SummaryCardProps {
   isLoading: boolean;
 }
 
-export function SummaryCard({
-  totalValue,
-  currency,
-  onCurrencyChange,
-  isLoading
-}: SummaryCardProps) {
+export function SummaryCard({ totalValue, currency, onCurrencyChange, isLoading }: SummaryCardProps) {
   const formatValue = (value: number, curr: Currency) => {
-    return new Intl.NumberFormat(curr === 'USD' ? 'en-US' : 'pl-PL', {
-      style: 'currency',
+    return new Intl.NumberFormat(curr === "USD" ? "en-US" : "pl-PL", {
+      style: "currency",
       currency: curr,
     }).format(value);
   };
@@ -28,18 +23,18 @@ export function SummaryCard({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Total Portfolio Value</CardTitle>
         <div className="flex items-center space-x-1">
-          <Button 
-            variant={currency === 'USD' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => onCurrencyChange('USD')}
+          <Button
+            variant={currency === "USD" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onCurrencyChange("USD")}
             disabled={isLoading}
           >
             USD
           </Button>
-          <Button 
-            variant={currency === 'PLN' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => onCurrencyChange('PLN')}
+          <Button
+            variant={currency === "PLN" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onCurrencyChange("PLN")}
             disabled={isLoading}
           >
             PLN
@@ -48,14 +43,9 @@ export function SummaryCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">
-          {isLoading ? (
-            <span className="animate-pulse">...</span>
-          ) : (
-            formatValue(totalValue, currency)
-          )}
+          {isLoading ? <span className="animate-pulse">...</span> : formatValue(totalValue, currency)}
         </div>
       </CardContent>
     </Card>
   );
 }
-

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,8 +8,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../ui/alert-dialog';
-import type { PortfolioAssetDTO } from '../../../types';
+} from "../../ui/alert-dialog";
+import type { PortfolioAssetDTO } from "../../../types";
 
 interface DeleteAssetAlertProps {
   asset: PortfolioAssetDTO | null;
@@ -32,7 +32,7 @@ export function DeleteAssetAlert({ asset, open, onOpenChange, onConfirm }: Delet
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={() => onConfirm(asset.id)}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
@@ -43,4 +43,3 @@ export function DeleteAssetAlert({ asset, open, onOpenChange, onConfirm }: Delet
     </AlertDialog>
   );
 }
-

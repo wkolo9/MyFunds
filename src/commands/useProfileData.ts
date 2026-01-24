@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
-import type { ProfileDTO, SectorDTO, Currency } from '../types';
-import { profileApi } from '../lib/api/profile.client';
+import { useState, useCallback, useEffect } from "react";
+import type { ProfileDTO, SectorDTO, Currency } from "../types";
+import { profileApi } from "../lib/api/profile.client";
 
 export interface ProfileViewState {
   profile: ProfileDTO | null;
@@ -20,25 +20,22 @@ export function useProfileData() {
   });
 
   const refreshData = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoadingProfile: true, isLoadingSectors: true, error: null }));
+    setState((prev) => ({ ...prev, isLoadingProfile: true, isLoadingSectors: true, error: null }));
     try {
-      const [profile, sectorsData] = await Promise.all([
-        profileApi.getProfile(),
-        profileApi.getSectors()
-      ]);
-      setState(prev => ({
+      const [profile, sectorsData] = await Promise.all([profileApi.getProfile(), profileApi.getSectors()]);
+      setState((prev) => ({
         ...prev,
         profile,
         sectors: sectorsData.sectors,
         isLoadingProfile: false,
-        isLoadingSectors: false
+        isLoadingSectors: false,
       }));
     } catch (err: any) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        error: err.message || 'Failed to fetch data',
+        error: err.message || "Failed to fetch data",
         isLoadingProfile: false,
-        isLoadingSectors: false
+        isLoadingSectors: false,
       }));
     }
   }, []);
@@ -51,9 +48,9 @@ export function useProfileData() {
   const updateCurrency = async (currency: Currency) => {
     try {
       const updatedProfile = await profileApi.updateCurrency(currency);
-      setState(prev => ({ ...prev, profile: updatedProfile }));
+      setState((prev) => ({ ...prev, profile: updatedProfile }));
     } catch (err: any) {
-      setState(prev => ({ ...prev, error: err.message || 'Failed to update currency' }));
+      setState((prev) => ({ ...prev, error: err.message || "Failed to update currency" }));
       throw err;
     }
   };
@@ -61,10 +58,10 @@ export function useProfileData() {
   const addSector = async (name: string) => {
     try {
       const newSector = await profileApi.addSector(name);
-      setState(prev => ({ ...prev, sectors: [...prev.sectors, newSector] }));
+      setState((prev) => ({ ...prev, sectors: [...prev.sectors, newSector] }));
     } catch (err: any) {
       if (err.status === 409) {
-        throw new Error('Sector with this name already exists');
+        throw new Error("Sector with this name already exists");
       }
       throw err;
     }
@@ -73,13 +70,13 @@ export function useProfileData() {
   const updateSector = async (id: string, name: string) => {
     try {
       const updatedSector = await profileApi.updateSector(id, name);
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        sectors: prev.sectors.map(s => s.id === id ? updatedSector : s)
+        sectors: prev.sectors.map((s) => (s.id === id ? updatedSector : s)),
       }));
     } catch (err: any) {
-       if (err.status === 409) {
-        throw new Error('Sector with this name already exists');
+      if (err.status === 409) {
+        throw new Error("Sector with this name already exists");
       }
       throw err;
     }
@@ -88,9 +85,9 @@ export function useProfileData() {
   const deleteSector = async (id: string) => {
     try {
       await profileApi.deleteSector(id);
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        sectors: prev.sectors.filter(s => s.id !== id)
+        sectors: prev.sectors.filter((s) => s.id !== id),
       }));
     } catch (err: any) {
       throw err;
@@ -103,7 +100,6 @@ export function useProfileData() {
     updateCurrency,
     addSector,
     updateSector,
-    deleteSector
+    deleteSector,
   };
 }
-

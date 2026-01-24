@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Profile validation schemas using Zod
@@ -9,7 +9,7 @@ import { z } from 'zod';
 /**
  * Currency validation schema
  */
-export const currencySchema = z.enum(['USD', 'PLN']);
+export const currencySchema = z.enum(["USD", "PLN"]);
 
 /**
  * Profile response validation schema
@@ -36,7 +36,7 @@ export const updateProfileCommandSchema = z.object({
  */
 export const authorizationHeaderSchema = z
   .string()
-  .regex(/^Bearer\s+.+$/, 'Authorization header must be in format: Bearer <token>');
+  .regex(/^Bearer\s+.+$/, "Authorization header must be in format: Bearer <token>");
 
 /**
  * Type exports for TypeScript

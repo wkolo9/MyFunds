@@ -1,10 +1,13 @@
-import type { APIRoute } from 'astro';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../../db/database.types';
-import { createWatchlistService } from '../../../lib/services/watchlist.service';
-import { createErrorResponseObject, handleServiceError, ErrorCode } from '../../../lib/utils/error.utils';
-import { createWatchlistItemSchema, batchUpdateWatchlistItemsSchema } from '../../../lib/validation/watchlist.validation';
-import { getAuthenticatedUser } from '../../../lib/utils/auth.utils';
+import type { APIRoute } from "astro";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../../db/database.types";
+import { createWatchlistService } from "../../../lib/services/watchlist.service";
+import { createErrorResponseObject, handleServiceError, ErrorCode } from "../../../lib/utils/error.utils";
+import {
+  createWatchlistItemSchema,
+  batchUpdateWatchlistItemsSchema,
+} from "../../../lib/validation/watchlist.validation";
+import { getAuthenticatedUser } from "../../../lib/utils/auth.utils";
 
 export const prerender = false;
 
@@ -16,7 +19,7 @@ export const GET: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-       return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, "Missing or invalid authentication", 401);
     }
     const userId = user.id;
 
@@ -26,7 +29,7 @@ export const GET: APIRoute = async (context) => {
 
     return new Response(JSON.stringify(watchlist), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     return handleServiceError(error);
@@ -41,7 +44,7 @@ export const POST: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, "Missing or invalid authentication", 401);
     }
     const userId = user.id;
 
@@ -49,18 +52,13 @@ export const POST: APIRoute = async (context) => {
     try {
       body = await context.request.json();
     } catch (e) {
-      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, 'Invalid JSON body', 400);
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
     const parseResult = createWatchlistItemSchema.safeParse(body);
     if (!parseResult.success) {
       const firstError = parseResult.error.errors[0];
-      return createErrorResponseObject(
-        ErrorCode.VALIDATION_ERROR, 
-        firstError.message, 
-        400, 
-        firstError.path.join('.')
-      );
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, firstError.message, 400, firstError.path.join("."));
     }
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
@@ -69,7 +67,7 @@ export const POST: APIRoute = async (context) => {
 
     return new Response(JSON.stringify(newItem), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     return handleServiceError(error);
@@ -84,7 +82,7 @@ export const PATCH: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     if (!user) {
-      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, 'Missing or invalid authentication', 401);
+      return createErrorResponseObject(ErrorCode.MISSING_AUTH_HEADER, "Missing or invalid authentication", 401);
     }
     const userId = user.id;
 
@@ -92,18 +90,13 @@ export const PATCH: APIRoute = async (context) => {
     try {
       body = await context.request.json();
     } catch (e) {
-      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, 'Invalid JSON body', 400);
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, "Invalid JSON body", 400);
     }
 
     const parseResult = batchUpdateWatchlistItemsSchema.safeParse(body);
     if (!parseResult.success) {
       const firstError = parseResult.error.errors[0];
-      return createErrorResponseObject(
-        ErrorCode.VALIDATION_ERROR, 
-        firstError.message, 
-        400, 
-        firstError.path.join('.')
-      );
+      return createErrorResponseObject(ErrorCode.VALIDATION_ERROR, firstError.message, 400, firstError.path.join("."));
     }
 
     const supabase = context.locals.supabase as SupabaseClient<Database>;
@@ -112,7 +105,7 @@ export const PATCH: APIRoute = async (context) => {
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     return handleServiceError(error);

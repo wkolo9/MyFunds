@@ -8,7 +8,8 @@ const { pathname } = Astro.url;
 const isPortfolio = pathname === "/" || pathname.startsWith("/portfolio");
 const isWatchlist = pathname.startsWith("/watchlist");
 
-const linkBase = "flex items-center justify-center py-3 px-4 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+const linkBase =
+  "flex items-center justify-center py-3 px-4 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 const activeClasses = "bg-secondary-foreground text-secondary border-secondary-foreground shadow-sm";
 const inactiveClasses = "bg-card text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground";
 ---

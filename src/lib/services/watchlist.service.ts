@@ -1,16 +1,16 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { 
-  WatchlistListDTO, 
-  WatchlistItemDTO, 
-  CreateWatchlistItemCommand, 
-  BatchUpdateWatchlistItemsCommand, 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
+import type {
+  WatchlistListDTO,
+  WatchlistItemDTO,
+  CreateWatchlistItemCommand,
+  BatchUpdateWatchlistItemsCommand,
   BatchUpdateWatchlistItemsDTO,
   WatchlistItemEntity,
-  WatchlistItemUpdate
-} from '../../types';
-import { ValidationError, NotFoundError, DatabaseError, ConflictError } from '../utils/error.utils';
-import { marketService } from './market.service';
+  WatchlistItemUpdate,
+} from "../../types";
+import { ValidationError, NotFoundError, DatabaseError, ConflictError } from "../utils/error.utils";
+import { marketService } from "./market.service";
 
 /**
  * Watchlist Service - handles watchlist-related database operations
@@ -23,15 +23,19 @@ export class WatchlistService {
    */
   async getWatchlist(userId: string): Promise<WatchlistListDTO> {
     if (!userId) {
-      throw new ValidationError('User ID is required', 'user_id');
+      throw new ValidationError("User ID is required", "user_id");
     }
 
     // 1. Fetch items from DB
-    const { data: items, error, count } = await this.supabase
-      .from('watchlist_items')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('grid_position', { ascending: true });
+    const {
+      data: items,
+      error,
+      count,
+    } = await this.supabase
+      .from("watchlist_items")
+      .select("*", { count: "exact" })
+      .eq("user_id", userId)
+      .order("grid_position", { ascending: true });
 
     if (error) {
       throw new DatabaseError(error.message);
@@ -74,30 +78,30 @@ export class WatchlistService {
    * Creates a new watchlist item
    */
   async createWatchlistItem(userId: string, command: CreateWatchlistItemCommand): Promise<WatchlistItemDTO> {
-    if (!userId) throw new ValidationError('User ID is required', 'user_id');
+    if (!userId) throw new ValidationError("User ID is required", "user_id");
 
     // 1. Validate grid position
     if (command.grid_position < 0 || command.grid_position > 15) {
-      throw new ValidationError('Grid position must be between 0 and 15', 'grid_position');
+      throw new ValidationError("Grid position must be between 0 and 15", "grid_position");
     }
 
     // 2. Check max items limit (16)
     const { count, error: countError } = await this.supabase
-      .from('watchlist_items')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .from("watchlist_items")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
 
     if (countError) throw new DatabaseError(countError.message);
     if (count !== null && count >= 16) {
-      throw new ValidationError('Maximum limit of 16 watchlist items reached', 'watchlist');
+      throw new ValidationError("Maximum limit of 16 watchlist items reached", "watchlist");
     }
 
     // 3. Check if ticker already exists for this user
     const { data: existingTicker, error: tickerError } = await this.supabase
-      .from('watchlist_items')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('ticker', command.ticker)
+      .from("watchlist_items")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("ticker", command.ticker)
       .maybeSingle();
 
     if (tickerError) throw new DatabaseError(tickerError.message);
@@ -107,10 +111,10 @@ export class WatchlistService {
 
     // 4. Check if position is occupied
     const { data: existingPosition, error: positionError } = await this.supabase
-      .from('watchlist_items')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('grid_position', command.grid_position)
+      .from("watchlist_items")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("grid_position", command.grid_position)
       .maybeSingle();
 
     if (positionError) throw new DatabaseError(positionError.message);
@@ -123,17 +127,17 @@ export class WatchlistService {
       await marketService.getPrice(command.ticker);
     } catch (err) {
       if (err instanceof NotFoundError) {
-        throw new ValidationError(`Invalid ticker symbol: ${command.ticker}`, 'ticker');
+        throw new ValidationError(`Invalid ticker symbol: ${command.ticker}`, "ticker");
       }
-      // If market service is down, we might allow it or fail. 
+      // If market service is down, we might allow it or fail.
       // Plan says: "Invalid Ticker: Market API check fails -> Return 400 or 404".
       // We'll treat it as validation error if not found.
-      throw err; 
+      throw err;
     }
 
     // 6. Insert item
     const { data, error } = await this.supabase
-      .from('watchlist_items')
+      .from("watchlist_items")
       .insert({
         user_id: userId,
         ticker: command.ticker,
@@ -158,19 +162,22 @@ export class WatchlistService {
   /**
    * Batch updates watchlist items (positions and/or tickers)
    */
-  async batchUpdateItems(userId: string, command: BatchUpdateWatchlistItemsCommand): Promise<BatchUpdateWatchlistItemsDTO> {
-    if (!userId) throw new ValidationError('User ID is required', 'user_id');
+  async batchUpdateItems(
+    userId: string,
+    command: BatchUpdateWatchlistItemsCommand
+  ): Promise<BatchUpdateWatchlistItemsDTO> {
+    if (!userId) throw new ValidationError("User ID is required", "user_id");
     if (!command.updates || command.updates.length === 0) {
-      throw new ValidationError('No updates provided', 'updates');
+      throw new ValidationError("No updates provided", "updates");
     }
 
     // 1. Fetch current state
     const currentItems = await this.fetchCurrentItems(userId);
-    const itemMap = new Map(currentItems.map(item => [item.id, item]));
+    const itemMap = new Map(currentItems.map((item) => [item.id, item]));
 
     // 2. Prepare and validate working state
     const workingState = this.applyUpdates(currentItems, command.updates);
-    
+
     // 3. Validate constraints on the final state
     this.validateWatchlistState(workingState);
 
@@ -179,7 +186,7 @@ export class WatchlistService {
 
     // 5. Enrich with market data
     return {
-      items: await this.enrichItemsWithPrices(updatedData)
+      items: await this.enrichItemsWithPrices(updatedData),
     };
   }
 
@@ -187,29 +194,29 @@ export class WatchlistService {
 
   private async fetchCurrentItems(userId: string): Promise<WatchlistItemEntity[]> {
     const { data: currentItems, error: fetchError } = await this.supabase
-      .from('watchlist_items')
-      .select('*')
-      .eq('user_id', userId);
+      .from("watchlist_items")
+      .select("*")
+      .eq("user_id", userId);
 
     if (fetchError) throw new DatabaseError(fetchError.message);
-    if (!currentItems) throw new NotFoundError('Watchlist items');
+    if (!currentItems) throw new NotFoundError("Watchlist items");
     return currentItems;
   }
 
   private applyUpdates(currentItems: WatchlistItemEntity[], updates: WatchlistItemUpdate[]): WatchlistItemEntity[] {
     // Deep copy to avoid mutating original state references if any
-    const workingState = currentItems.map(item => ({ ...item }));
+    const workingState = currentItems.map((item) => ({ ...item }));
 
     for (const update of updates) {
-      const itemIndex = workingState.findIndex(item => item.id === update.id);
+      const itemIndex = workingState.findIndex((item) => item.id === update.id);
       if (itemIndex === -1) {
         throw new NotFoundError(`Watchlist item ${update.id}`);
       }
-      
+
       if (update.grid_position !== undefined) {
         workingState[itemIndex].grid_position = update.grid_position;
       }
-      
+
       if (update.ticker !== undefined) {
         workingState[itemIndex].ticker = update.ticker;
       }
@@ -224,12 +231,15 @@ export class WatchlistService {
     for (const item of items) {
       // Validate position range
       if (item.grid_position < 0 || item.grid_position > 15) {
-        throw new ValidationError(`Invalid grid position ${item.grid_position} for item ${item.ticker}`, 'grid_position');
+        throw new ValidationError(
+          `Invalid grid position ${item.grid_position} for item ${item.ticker}`,
+          "grid_position"
+        );
       }
 
       // Check unique position
       if (usedPositions.has(item.grid_position)) {
-         throw new ConflictError(`Grid position ${item.grid_position} is duplicated in the update`);
+        throw new ConflictError(`Grid position ${item.grid_position} is duplicated in the update`);
       }
       usedPositions.add(item.grid_position);
 
@@ -243,14 +253,16 @@ export class WatchlistService {
 
   private async persistUpdates(userId: string, items: WatchlistItemEntity[]): Promise<WatchlistItemEntity[]> {
     const { data, error } = await this.supabase
-      .from('watchlist_items')
-      .upsert(items.map(item => ({
-        id: item.id,
-        user_id: userId,
-        ticker: item.ticker,
-        grid_position: item.grid_position,
-        created_at: item.created_at
-      })))
+      .from("watchlist_items")
+      .upsert(
+        items.map((item) => ({
+          id: item.id,
+          user_id: userId,
+          ticker: item.ticker,
+          grid_position: item.grid_position,
+          created_at: item.created_at,
+        }))
+      )
       .select();
 
     if (error) throw new DatabaseError(error.message);
@@ -271,31 +283,26 @@ export class WatchlistService {
     );
   }
 
-
   /**
    * Deletes a watchlist item
    */
   async deleteWatchlistItem(userId: string, itemId: string): Promise<void> {
-    if (!userId) throw new ValidationError('User ID is required', 'user_id');
-    if (!itemId) throw new ValidationError('Item ID is required', 'id');
+    if (!userId) throw new ValidationError("User ID is required", "user_id");
+    if (!itemId) throw new ValidationError("Item ID is required", "id");
 
     // 1. Check existence
     const { data: existing, error: findError } = await this.supabase
-      .from('watchlist_items')
-      .select('id')
-      .eq('id', itemId)
-      .eq('user_id', userId)
+      .from("watchlist_items")
+      .select("id")
+      .eq("id", itemId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (findError) throw new DatabaseError(findError.message);
-    if (!existing) throw new NotFoundError('Watchlist item');
+    if (!existing) throw new NotFoundError("Watchlist item");
 
     // 2. Delete
-    const { error } = await this.supabase
-      .from('watchlist_items')
-      .delete()
-      .eq('id', itemId)
-      .eq('user_id', userId);
+    const { error } = await this.supabase.from("watchlist_items").delete().eq("id", itemId).eq("user_id", userId);
 
     if (error) throw new DatabaseError(error.message);
   }
@@ -307,4 +314,3 @@ export class WatchlistService {
 export function createWatchlistService(supabase: SupabaseClient<Database>): WatchlistService {
   return new WatchlistService(supabase);
 }
-

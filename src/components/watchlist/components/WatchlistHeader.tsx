@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, Plus, Info } from 'lucide-react';
-import { toast } from 'sonner';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Plus, Info } from "lucide-react";
+import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface WatchlistHeaderProps {
   onAddTicker: (ticker: string) => Promise<void>;
@@ -16,18 +11,14 @@ interface WatchlistHeaderProps {
   maxItems: number;
 }
 
-export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ 
-  onAddTicker, 
-  itemCount, 
-  maxItems 
-}) => {
-  const [ticker, setTicker] = useState('');
+export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ onAddTicker, itemCount, maxItems }) => {
+  const [ticker, setTicker] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanTicker = ticker.trim().toUpperCase();
-    
+
     if (!cleanTicker) return;
 
     if (itemCount >= maxItems) {
@@ -38,7 +29,7 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({
     try {
       setIsSubmitting(true);
       await onAddTicker(cleanTicker);
-      setTicker('');
+      setTicker("");
     } catch (error) {
       // Error is handled by the hook usually, but we catch here to stop loading state if needed
     } finally {
@@ -65,7 +56,7 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({
             disabled={isSubmitting}
           />
         </div>
-        
+
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -80,12 +71,9 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({
           </Tooltip>
         </TooltipProvider>
 
-        <Button 
-          type="submit" 
-          disabled={isSubmitting || !ticker.trim()}
-        >
+        <Button type="submit" disabled={isSubmitting || !ticker.trim()}>
           {isSubmitting ? (
-             <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/50 border-t-primary-foreground" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/50 border-t-primary-foreground" />
           ) : (
             <>
               <Plus className="mr-2 h-4 w-4" /> Add

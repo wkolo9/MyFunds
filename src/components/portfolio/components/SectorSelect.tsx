@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, X, Check, Loader2 } from 'lucide-react';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, SelectSeparator } from '../../ui/select';
-import { Input } from '../../ui/input';
-import { Button } from '../../ui/button';
-import { sectorApi } from '../../../lib/api/sector.client';
-import type { SectorDTO } from '../../../types';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { Plus, X, Check, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectSeparator,
+} from "../../ui/select";
+import { Input } from "../../ui/input";
+import { Button } from "../../ui/button";
+import { sectorApi } from "../../../lib/api/sector.client";
+import type { SectorDTO } from "../../../types";
+import { toast } from "sonner";
 
 interface SectorSelectProps {
   value: string | null;
@@ -17,7 +25,7 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
   const [sectors, setSectors] = useState<SectorDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [newSectorName, setNewSectorName] = useState('');
+  const [newSectorName, setNewSectorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -30,8 +38,8 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
       const data = await sectorApi.getSectors();
       setSectors(data.sectors);
     } catch (error) {
-      console.error('Failed to load sectors', error);
-      toast.error('Failed to load sectors');
+      console.error("Failed to load sectors", error);
+      toast.error("Failed to load sectors");
     } finally {
       setLoading(false);
     }
@@ -43,18 +51,18 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
     try {
       setIsSubmitting(true);
       const newId = await onNewSector(newSectorName);
-      
+
       // Refresh list to include new sector
       await loadSectors();
-      
+
       // Select the new sector
       onChange(newId);
-      
+
       // Reset mode
       setIsCreating(false);
-      setNewSectorName('');
+      setNewSectorName("");
     } catch (error) {
-      console.error('Failed to create sector', error);
+      console.error("Failed to create sector", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,32 +80,32 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
           autoFocus
           data-test-id="new-sector-name-input"
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               e.preventDefault(); // Prevent form submission if inside form
               handleCreate();
             }
-            if (e.key === 'Escape') {
+            if (e.key === "Escape") {
               setIsCreating(false);
-              setNewSectorName('');
+              setNewSectorName("");
             }
           }}
         />
-        <Button 
-          type="button" 
-          size="sm" 
+        <Button
+          type="button"
+          size="sm"
           onClick={handleCreate}
           disabled={!newSectorName.trim() || isSubmitting}
           data-test-id="confirm-new-sector-button"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
         </Button>
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setIsCreating(false);
-            setNewSectorName('');
+            setNewSectorName("");
           }}
           disabled={isSubmitting}
         >
@@ -126,20 +134,30 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-            {/* Treat 'null' as "Other" or "Unassigned" */}
-            <SelectItem value="null" data-test-id="sector-option-other">Other</SelectItem>
-            {sectors.map((sector) => (
-            <SelectItem key={sector.id} value={sector.id} data-test-id={`sector-option-${sector.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                {sector.name}
+          {/* Treat 'null' as "Other" or "Unassigned" */}
+          <SelectItem value="null" data-test-id="sector-option-other">
+            Other
+          </SelectItem>
+          {sectors.map((sector) => (
+            <SelectItem
+              key={sector.id}
+              value={sector.id}
+              data-test-id={`sector-option-${sector.name.toLowerCase().replace(/\s+/g, "-")}`}
+            >
+              {sector.name}
             </SelectItem>
-            ))}
+          ))}
         </SelectGroup>
         <SelectSeparator />
         <SelectGroup>
-          <SelectItem value="create_new" className="font-medium text-primary cursor-pointer" data-test-id="create-new-sector-option">
+          <SelectItem
+            value="create_new"
+            className="font-medium text-primary cursor-pointer"
+            data-test-id="create-new-sector-option"
+          >
             <div className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Create new sector
+              <Plus className="h-4 w-4" />
+              Create new sector
             </div>
           </SelectItem>
         </SelectGroup>
@@ -147,4 +165,3 @@ export function SectorSelect({ value, onChange, onNewSector }: SectorSelectProps
     </Select>
   );
 }
-

@@ -1,13 +1,6 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../../ui/table"
-import { SectorRow } from "./SectorRow"
-import type { SectorDTO } from "@/types"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
+import { SectorRow } from "./SectorRow";
+import type { SectorDTO } from "@/types";
 
 interface SectorListProps {
   sectors: SectorDTO[];
@@ -22,7 +15,7 @@ export function SectorList({ sectors, existingNames, onSave, onDeleteRequest }: 
       <div className="text-center py-6 text-muted-foreground text-sm">
         No sectors found. Add your first sector above.
       </div>
-    )
+    );
   }
 
   return (
@@ -47,6 +40,5 @@ export function SectorList({ sectors, existingNames, onSave, onDeleteRequest }: 
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
-

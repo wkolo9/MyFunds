@@ -1,33 +1,22 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from 'sonner';
-import { Info } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../../ui/tooltip';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '../../ui/dialog';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { Label } from '../../ui/label';
-import { SectorSelect } from './SectorSelect';
-import { sectorApi } from '../../../lib/api/sector.client';
-import type { CreatePortfolioAssetCommand, PortfolioAssetDTO } from '../../../types';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
+import { SectorSelect } from "./SectorSelect";
+import { sectorApi } from "../../../lib/api/sector.client";
+import type { CreatePortfolioAssetCommand, PortfolioAssetDTO } from "../../../types";
 
 const assetSchema = z.object({
-  ticker: z.string().min(1, 'Ticker is required').max(10, 'Ticker is too long'),
+  ticker: z.string().min(1, "Ticker is required").max(10, "Ticker is too long"),
   quantity: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: 'Quantity must be a positive number',
+    message: "Quantity must be a positive number",
   }),
   sector_id: z.string().nullable(),
 });
@@ -52,8 +41,8 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
   } = useForm<AssetFormData>({
     resolver: zodResolver(assetSchema),
     defaultValues: {
-      ticker: '',
-      quantity: '',
+      ticker: "",
+      quantity: "",
       sector_id: null,
     },
   });
@@ -74,10 +63,10 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
       });
       onOpenChange(false);
     } catch (error: any) {
-      if (error.message?.includes('Invalid ticker symbol')) {
-        setError('ticker', {
-          type: 'manual',
-          message: 'Invalid ticker symbol. Please verify the ticker.',
+      if (error.message?.includes("Invalid ticker symbol")) {
+        setError("ticker", {
+          type: "manual",
+          message: "Invalid ticker symbol. Please verify the ticker.",
         });
         toast.error(`Invalid ticker symbol: ${data.ticker}`);
       }
@@ -113,14 +102,12 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
             <Input
               id="ticker"
               placeholder="e.g. AAPL"
-              {...register('ticker')}
-              onChange={(e) => setValue('ticker', e.target.value.toUpperCase())}
+              {...register("ticker")}
+              onChange={(e) => setValue("ticker", e.target.value.toUpperCase())}
               data-test-id="asset-ticker-input"
               aria-invalid={!!errors.ticker}
             />
-            {errors.ticker && (
-              <p className="text-sm text-destructive">{errors.ticker.message}</p>
-            )}
+            {errors.ticker && <p className="text-sm text-destructive">{errors.ticker.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -130,19 +117,17 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
               type="number"
               step="any"
               placeholder="e.g. 10"
-              {...register('quantity')}
+              {...register("quantity")}
               data-test-id="asset-quantity-input"
             />
-            {errors.quantity && (
-              <p className="text-sm text-destructive">{errors.quantity.message}</p>
-            )}
+            {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
           </div>
 
           <div className="space-y-2">
             <Label>Sector</Label>
             <SectorSelect
-              value={watch('sector_id')}
-              onChange={(val) => setValue('sector_id', val)}
+              value={watch("sector_id")}
+              onChange={(val) => setValue("sector_id", val)}
               onNewSector={createSector}
             />
           </div>
@@ -152,7 +137,7 @@ export function AddAssetDialog({ open, onOpenChange, onSubmit }: AddAssetDialogP
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting} data-test-id="submit-asset-button">
-              {isSubmitting ? 'Adding...' : 'Add Asset'}
+              {isSubmitting ? "Adding..." : "Add Asset"}
             </Button>
           </DialogFooter>
         </form>
@@ -192,12 +177,12 @@ export function EditAssetDialog({ asset, open, onOpenChange, onSubmit }: EditAss
 
   const handleFormSubmit = async (data: AssetFormData) => {
     if (!asset) return;
-    
+
     await onSubmit(asset.id, {
-        // Ticker usually isn't editable in simple edit forms, but schema has it. 
-        // For update, we usually just update quantity/sector
-        quantity: data.quantity,
-        sector_id: data.sector_id
+      // Ticker usually isn't editable in simple edit forms, but schema has it.
+      // For update, we usually just update quantity/sector
+      quantity: data.quantity,
+      sector_id: data.sector_id,
     });
     onOpenChange(false);
   };
@@ -216,32 +201,20 @@ export function EditAssetDialog({ asset, open, onOpenChange, onSubmit }: EditAss
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-ticker">Ticker</Label>
-            <Input
-              id="edit-ticker"
-              value={asset?.ticker}
-              disabled
-              className="bg-muted"
-            />
+            <Input id="edit-ticker" value={asset?.ticker} disabled className="bg-muted" />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="edit-quantity">Quantity</Label>
-            <Input
-              id="edit-quantity"
-              type="number"
-              step="any"
-              {...register('quantity')}
-            />
-             {errors.quantity && (
-              <p className="text-sm text-destructive">{errors.quantity.message}</p>
-            )}
+            <Input id="edit-quantity" type="number" step="any" {...register("quantity")} />
+            {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
           </div>
 
           <div className="space-y-2">
             <Label>Sector</Label>
             <SectorSelect
-              value={watch('sector_id')}
-              onChange={(val) => setValue('sector_id', val)}
+              value={watch("sector_id")}
+              onChange={(val) => setValue("sector_id", val)}
               onNewSector={createSector}
             />
           </div>
@@ -251,7 +224,7 @@ export function EditAssetDialog({ asset, open, onOpenChange, onSubmit }: EditAss
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </form>
@@ -259,4 +232,3 @@ export function EditAssetDialog({ asset, open, onOpenChange, onSubmit }: EditAss
     </Dialog>
   );
 }
-
