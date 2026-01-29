@@ -1,6 +1,33 @@
 import { defineMiddleware } from "astro:middleware";
 import { createSupabaseServerInstance } from "../db/supabase.client";
 
+// Polyfill MessageChannel for Cloudflare Workers if missing
+// This fixes issues with libraries (like certain fetch polyfills or testing libs) that expect it
+if (typeof globalThis.MessageChannel === "undefined") {
+  // @ts-expect-error - Minimal polyfill for environment compatibility
+  globalThis.c = class MessageChannel {
+    port1: MessagePort;
+    port2: MessagePort;
+    constructor() {
+      // Mock ports with minimal necessary API
+      const createPort = () => ({
+        onmessage: null,
+        onmessageerror: null,
+        postMessage: () => {},
+        start: () => {},
+        close: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => true,
+      });
+      // @ts-expect-error - Mocking internal types
+      this.port1 = createPort();
+      // @ts-expect-error - Mocking internal types
+      this.port2 = createPort();
+    }
+  };
+}
+
 // Public paths - Auth API endpoints & Server-Rendered Astro Pages
 const PUBLIC_PATHS = [
   // Server-Rendered Astro Pages
