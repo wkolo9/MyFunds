@@ -36,6 +36,12 @@ describe("Watchlist API", () => {
     vi.clearAllMocks();
     mockContext.request.headers = new Map();
 
+    // Default auth mock: return null user
+    mockSupabase.auth.getUser.mockResolvedValue({
+      data: { user: null },
+      error: null,
+    });
+
     // Setup Service Mock
     mockWatchlistService = {
       getWatchlist: vi.fn(),
@@ -61,7 +67,7 @@ describe("Watchlist API", () => {
       const response = await GET(mockContext);
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error.code).toBe(ErrorCode.INVALID_TOKEN);
+      expect(data.error.code).toBe(ErrorCode.MISSING_AUTH_HEADER);
     });
   });
 

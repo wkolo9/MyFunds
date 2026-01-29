@@ -47,7 +47,7 @@ describe("Sectors API", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error.code).toBe(ErrorCode.INVALID_TOKEN);
+      expect(data.error.code).toBe(ErrorCode.MISSING_AUTH_HEADER);
     });
 
     it("should return sectors list", async () => {

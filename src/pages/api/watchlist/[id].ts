@@ -31,7 +31,7 @@ export const DELETE: APIRoute = async (context) => {
     // but the service deleteItem should handle it or the DB will.
     // The spec says user can only manage their own items.
 
-    await watchlistService.deleteItem(userId, id);
+    await watchlistService.deleteWatchlistItem(userId, id);
 
     return new Response(null, {
       status: 204,

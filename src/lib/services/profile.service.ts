@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../../db/database.types";
 import type { ProfileEntity } from "../../types";
-import { ValidationError } from "../../lib/utils/error.utils";
+import { DatabaseError, NotFoundError, ValidationError } from "../../lib/utils/error.utils";
 
 import type { UpdateProfileCommand } from "../../types";
 
@@ -28,13 +28,10 @@ export class ProfileService {
     const { data, error } = await this.supabase.from("profiles").select("*").eq("user_id", userId).single();
 
     if (error) {
-      // Return mocked data instead of throwing for now
-      return {
-        user_id: userId,
-        preferred_currency: "USD",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as ProfileEntity;
+      if (error.code === "PGRST116") {
+        throw new NotFoundError("Profile");
+      }
+      throw new DatabaseError(error.message);
     }
 
     return data as ProfileEntity;

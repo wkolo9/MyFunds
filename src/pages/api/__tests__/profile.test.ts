@@ -36,7 +36,10 @@ describe("/api/profile", () => {
 
     mockSupabaseClient = {
       auth: {
-        getUser: vi.fn(),
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: DEFAULT_USER_ID } },
+          error: null,
+        }),
       },
     } as unknown as MockSupabaseClient;
 
@@ -86,7 +89,7 @@ describe("/api/profile", () => {
 
       expect(response.status).toBe(500);
       expect(result.error.code).toBe("INTERNAL_ERROR");
-      expect(result.error.message).toBe("Database client not available");
+      expect(result.error.message).toBe("Internal server error");
     });
 
     it("should return 404 when profile not found", async () => {
@@ -162,6 +165,14 @@ describe("/api/profile", () => {
     });
 
     it("should update profile successfully", async () => {
+      // Force session getUser to return null so it checks the token
+      mockSupabaseClient.auth.getUser.mockImplementation((token) => {
+        if (token === validToken) {
+          return Promise.resolve({ data: { user: mockUser }, error: null });
+        }
+        return Promise.resolve({ data: { user: null }, error: null });
+      });
+
       const updatedProfile = {
         user_id: mockUser.id,
         preferred_currency: "PLN",
@@ -180,6 +191,8 @@ describe("/api/profile", () => {
     });
 
     it("should return 401 if Authorization header is missing", async () => {
+      // Ensure session is null
+      mockSupabaseClient.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
       mockContext.request.headers.delete("Authorization");
 
       const response = await PATCH(mockContext);
@@ -196,7 +209,7 @@ describe("/api/profile", () => {
       const result = await response.json();
 
       expect(response.status).toBe(401);
-      expect(result.error.code).toBe("INVALID_TOKEN");
+      expect(result.error.code).toBe("MISSING_AUTH_HEADER");
     });
 
     it("should return 400 if body is invalid JSON", async () => {

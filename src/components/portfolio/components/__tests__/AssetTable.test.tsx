@@ -94,7 +94,7 @@ describe("AssetTable Component", () => {
     render(<AssetTable {...defaultProps} assets={assets} />);
 
     // Initial order might be whatever, let's click to sort
-    const sortButton = screen.getByText("Value");
+    const sortButton = screen.getByRole("button", { name: /value/i });
 
     // First click - usually ASC or DESC depending on default.
     // The implementation toggles: column.toggleSorting(column.getIsSorted() === "asc")

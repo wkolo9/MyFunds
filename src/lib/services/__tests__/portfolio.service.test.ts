@@ -80,6 +80,7 @@ describe("PortfolioService", () => {
       mockMarketService.getPrice.mockResolvedValue({
         ticker: "AAPL",
         price: 150,
+        currency: "USD",
       });
 
       // Execute
@@ -110,7 +111,7 @@ describe("PortfolioService", () => {
       });
 
       mockMarketService.getExchangeRate.mockResolvedValue({ rate: 4.0 });
-      mockMarketService.getPrice.mockResolvedValue({ ticker: "AAPL", price: 100 });
+      mockMarketService.getPrice.mockResolvedValue({ ticker: "AAPL", price: 100, currency: "USD" });
 
       // Execute
       const result = await service.getAssets(userId, { currency: "PLN" });
@@ -126,7 +127,7 @@ describe("PortfolioService", () => {
     it("should create asset if valid", async () => {
       // Setup
       mockSupabase.from().select().eq().maybeSingle.mockResolvedValue({ data: null }); // No duplicate
-      mockMarketService.getPrice.mockResolvedValue({ ticker: "AAPL", price: 150 }); // Valid ticker
+      mockMarketService.getPrice.mockResolvedValue({ ticker: "AAPL", price: 150, currency: "USD" }); // Valid ticker
 
       const newAsset = {
         id: "new-1",
@@ -192,7 +193,7 @@ describe("PortfolioService", () => {
         error: null,
       });
 
-      mockMarketService.getPrice.mockResolvedValue({ ticker: "AAPL", price: 150 });
+      mockMarketService.getPrice.mockResolvedValue({ ticker: "AAPL", price: 150, currency: "USD" });
 
       // Execute
       const result = await service.updateAsset(userId, "1", { quantity: "20" });

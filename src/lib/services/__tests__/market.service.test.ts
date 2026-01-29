@@ -28,7 +28,7 @@ describe("MarketDataService", () => {
 
     // Hack to clear cache for testing purposes
     (service as any).cache.prices.clear();
-    (service as any).cache.exchangeRate = null;
+    (service as any).cache.exchangeRates.clear();
   });
 
   describe("getPrice", () => {
