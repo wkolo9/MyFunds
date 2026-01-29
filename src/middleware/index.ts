@@ -13,11 +13,21 @@ if (typeof globalThis.MessageChannel === "undefined") {
       const createPort = () => ({
         onmessage: null,
         onmessageerror: null,
-        postMessage: () => {},
-        start: () => {},
-        close: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
+        postMessage: () => {
+          // No-op for mock
+        },
+        start: () => {
+          // No-op for mock
+        },
+        close: () => {
+          // No-op for mock
+        },
+        addEventListener: () => {
+          // No-op for mock
+        },
+        removeEventListener: () => {
+          // No-op for mock
+        },
         dispatchEvent: () => true,
       });
       // @ts-expect-error - Mocking internal types
