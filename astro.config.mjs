@@ -13,8 +13,38 @@ export default defineConfig({
   server: { port: 3000 },
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      external: [
+        "node:fs",
+        "node:stream",
+        "node:tty",
+        "node:os",
+        "node:path",
+        "fs",
+        "path",
+        "os",
+        "tty",
+        "stream",
+        "util",
+        "events",
+        "url",
+        "net",
+        "tls",
+        "dns",
+        "child_process",
+        "process",
+        "fs/promises",
+        "node:fs/promises"
+      ],
+    },
+  },
+  image: {
+    service: {
+      entrypoint: 'astro/assets/services/noop'
+    }
   },
   adapter: cloudflare({
+    imageService: "compile",
     platformProxy: {
       enabled: false,
     },
