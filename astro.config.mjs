@@ -34,13 +34,13 @@ export default defineConfig({
         "child_process",
         "process",
         "fs/promises",
-        "node:fs/promises"
+        "node:fs/promises",
       ],
     },
   },
   image: {
     service: {
-      entrypoint: 'astro/assets/services/noop'
+      entrypoint: "astro/assets/services/noop",
     }
   },
   adapter: cloudflare({
