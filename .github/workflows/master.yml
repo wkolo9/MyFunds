@@ -60,8 +60,5 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          echo "Listing projects to verify access and names:"
-          npx wrangler pages project list
-          npx wrangler pages deploy dist --project-name=myfunds --branch=master
+        run: npx wrangler pages deploy dist --project-name=my-funds --branch=master
 
