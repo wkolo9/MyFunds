@@ -1,7 +1,7 @@
 // Polyfill MessageChannel for Cloudflare Workers if missing
 if (typeof globalThis.MessageChannel === "undefined") {
-  // @ts-ignore - Minimal polyfill for environment compatibility
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Minimal polyfill for environment compatibility
   globalThis.MessageChannel = class MessageChannel {
     port1: MessagePort;
     port2: MessagePort;
@@ -27,11 +27,11 @@ if (typeof globalThis.MessageChannel === "undefined") {
         },
         dispatchEvent: () => true,
       });
-      // @ts-ignore - Mocking internal types
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - Mocking internal types
       this.port1 = createPort();
-      // @ts-ignore - Mocking internal types
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - Mocking internal types
       this.port2 = createPort();
     }
   };
