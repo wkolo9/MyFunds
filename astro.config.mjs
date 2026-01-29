@@ -12,7 +12,19 @@ export default defineConfig({
   integrations: [react(), sitemap()],
   server: { port: 3000 },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      {
+        name: "inject-polyfill",
+        enforce: "pre",
+        transform(code, id) {
+          // Inject import into the main server entry point
+          if (id.includes("entry")) {
+            return `import '/src/lib/polyfill.ts';\n${code}`;
+          }
+        },
+      },
+    ],
     ssr: {
       external: [
         "node:fs",
