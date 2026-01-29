@@ -114,8 +114,8 @@ describe("AssetTable Component", () => {
     // Finding ticker cells
     // const tickers = cells.filter((c) => c.textContent === "LOW" || c.textContent === "HIGH");
 
-    // This is a basic interaction test to ensure the button is clickable and doesn't crash
-    expect(sortButton).toBeInTheDocument();
+    // We need to re-query the button because the table header might have re-rendered
+    expect(screen.getByRole("button", { name: /value/i })).toBeInTheDocument();
     expect(cells.length).toBeGreaterThan(0);
   });
 });
