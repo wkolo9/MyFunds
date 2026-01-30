@@ -64,6 +64,6 @@ jobs:
           echo "STARTING GITHUB ACTIONS DEPLOYMENT"
           # We use '.' as the directory because pages_build_output_dir is defined in wrangler.jsonc
           # If that fails, we fallback to explicit dist
-          npx wrangler pages deploy --project-name=my-funds --branch=master --commit-dirty=true || npx wrangler pages deploy dist --project-name=my-funds --branch=master --commit-dirty=true
+          npx wrangler pages deploy --project-name=myfunds --branch=master --commit-dirty=true || npx wrangler pages deploy dist --project-name=myfunds --branch=master --commit-dirty=true
           echo "FINISHED GITHUB ACTIONS DEPLOYMENT"
 
