@@ -62,6 +62,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           echo "STARTING GITHUB ACTIONS DEPLOYMENT"
-          npx wrangler pages deploy dist --project-name=my-funds --branch=master
+          # We use '.' as the directory because pages_build_output_dir is defined in wrangler.jsonc
+          # If that fails, we fallback to explicit dist
+          npx wrangler pages deploy --project-name=my-funds --branch=master --commit-dirty=true || npx wrangler pages deploy dist --project-name=my-funds --branch=master --commit-dirty=true
           echo "FINISHED GITHUB ACTIONS DEPLOYMENT"
 
