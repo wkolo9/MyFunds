@@ -62,31 +62,22 @@ test.describe("Portfolio Management", () => {
     });
 
     // Mock updated list after addition
-    // The component usually refetches the list after mutation
-    let listFetchCount = 0;
     await page.route("/api/portfolio?currency=USD", async (route) => {
-      listFetchCount++;
-      if (listFetchCount === 1) {
-        // First fetch (already handled above but route override order matters)
-        await route.fulfill({ json: { assets: [] } });
-      } else {
-        // Subsequent fetches (after add)
-        await route.fulfill({
-          json: {
-            assets: [
-              {
-                id: "new-asset-id",
-                ticker: "AAPL",
-                quantity: 10,
-                sector_id: "1",
-                sector_name: "Technology",
-                current_price: 150,
-                current_value: 1500,
-              },
-            ],
-          },
-        });
-      }
+      await route.fulfill({
+        json: {
+          assets: [
+            {
+              id: "new-asset-id",
+              ticker: "AAPL",
+              quantity: 10,
+              sector_id: "1",
+              sector_name: "Technology",
+              current_price: 150,
+              current_value: 1500,
+            },
+          ],
+        },
+      });
     });
 
     // Fill form
